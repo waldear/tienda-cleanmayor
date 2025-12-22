@@ -10,7 +10,15 @@ const CONFIG = {
 
 function doPost(e) {
   try {
-    const data = JSON.parse(e.postData.contents);
+    // Aceptar JSON directo o formulario con campo 'payload' (para evitar problemas CORS desde el navegador)
+    let data;
+    if (e.postData && e.postData.contents) {
+      data = JSON.parse(e.postData.contents);
+    } else if (e.parameter && e.parameter.payload) {
+      data = JSON.parse(e.parameter.payload);
+    } else {
+      data = {};
+    }
     
     // 1. Guardar en Sheets
     guardarEnSheets(data);

@@ -290,37 +290,49 @@
                 }
                 
                 // Enviar a Google Apps Script
-                console.log('Enviando a:', GOOGLE_SCRIPT_URL);
-                console.log('Datos:', data);
-                
-                const response = await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
-                });
-                
-                console.log('Response status:', response.status, response.type);
-                
-                // Con mode: 'no-cors', no podemos leer la respuesta JSON
-                // Generamos la URL de WhatsApp localmente como fallback
+                // Enviar mediante formulario oculto a un iframe para evitar CORS
+                console.log('Enviando a (form):', GOOGLE_SCRIPT_URL);
+                const iframeName = 'gs_post_iframe';
+                let iframe = document.getElementById(iframeName);
+                if (!iframe) {
+                    iframe = document.createElement('iframe');
+                    iframe.style.display = 'none';
+                    iframe.id = iframeName;
+                    iframe.name = iframeName;
+                    document.body.appendChild(iframe);
+                }
+
+                const form = document.createElement('form');
+                form.style.display = 'none';
+                form.method = 'POST';
+                form.action = GOOGLE_SCRIPT_URL;
+                form.target = iframeName;
+
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'payload';
+                input.value = JSON.stringify(data);
+                form.appendChild(input);
+
+                document.body.appendChild(form);
+                form.submit();
+                document.body.removeChild(form);
+
+                // Abrir WhatsApp inmediatamente (no dependemos de la respuesta por CORS)
                 const whatsappUrl = `https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(generarMensajeWhatsApp(data, '#'))}`;
                 window.open(whatsappUrl, '_blank');
-                
-                // Mostrar mensaje según método de factura
+
                 const mensaje = invoiceMethod === 'email' 
                     ? '✅ Pedido enviado por WhatsApp, factura será enviada por email' 
                     : '✅ Pedido enviado por WhatsApp';
                 alert(mensaje);
-                
+
                 // Resetear todo
                 cart = [];
                 document.getElementById('cart-count').textContent = '0';
                 document.getElementById('delivery-options').style.display = 'none';
                 deliveryOptionsShown = false;
-                
+
                 // Limpiar campos
                 document.getElementById('address').value = '';
                 document.getElementById('location').value = '';
