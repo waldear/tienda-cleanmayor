@@ -124,7 +124,7 @@
         let deliveryOptionsShown = false;
         
         // CONFIGURACIÓN
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxx5E9F4Rw_kIIVbZ7UjlExG2RFI-Oj3_VtybL7dV3LWnoCRgEX9jBTxi4Sq8_mnt0JAw/exec";
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwacOBS_s1rXP14VHw2z8-utVrHH56d9FG9sjUWmTd9ZnLNYQS83M0gXaUmy1U-I656/exec";
         const CONFIG = {
             WHATSAPP_NUMBER: "5493525550761"
         };
@@ -341,7 +341,8 @@
                 
             } catch(error) {
                 console.error('Error completo:', error);
-                alert('❌ Error de conexión. Verifica tu URL de Apps Script');
+                const msg = error && error.message ? error.message : String(error);
+                alert('❌ Ocurrió un error: ' + msg + '\nRevisa la consola (F12) para más detalles.');
             } finally {
                 // Restaurar botón
                 if (cartBtn && cartBtn.tagName && cartBtn.tagName.toLowerCase() === 'button') {
