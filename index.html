@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CleanMayor - Tienda Automatizada</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f7fa; }
+        .header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 2rem; text-align: center; }
+        .mode-toggle { background: #fff; padding: 1rem; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .switch { display: inline-flex; background: #e0e0e0; border-radius: 50px; padding: 5px; }
+        .switch button { padding: 10px 25px; border: none; border-radius: 50px; cursor: pointer; background: transparent; font-weight: bold; }
+        .switch button.active { background: #1e3c72; color: white; }
+        .catalog { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; padding: 2rem; }
+        .product { background: white; border-radius: 10px; padding: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .product h3 { color: #1e3c72; margin-bottom: 10px; }
+        .price { font-size: 1.5rem; font-weight: bold; color: #2a5298; }
+        .add-btn { background: #4CAF50; color: white; padding: 10px; width: 100%; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px; }
+        .cart { position: fixed; bottom: 20px; right: 20px; background: #1e3c72; color: white; padding: 15px 25px; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .delivery-options { background: white; padding: 2rem; margin: 1rem 2rem; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: none; }
+        .delivery-options h3 { color: #1e3c72; margin-bottom: 15px; }
+        .contact-preferences { background: #f8f9ff; padding: 1.5rem; border-radius: 8px; margin-top: 1.5rem; border: 2px solid #e3f2fd; }
+        .contact-preferences h4 { color: #1e3c72; margin-bottom: 15px; }
+        .option-group { margin-bottom: 15px; }
+        .option-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
+        .option-group input[type="radio"] { margin-right: 10px; }
+        .option-group input[type="text"],
+        .option-group input[type="email"],
+        .option-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-top: 5px; }
+        .hidden { display: none; }
+        .location-input { margin-top: 10px; }
+        .loading { animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .error { color: #d32f2f; font-size: 0.85rem; margin-top: 5px; }
+    </style>
+<base target="_blank">
+</head>
+<body>
+    <div class="header">
+        <h1>🧽 CleanMayor - Productos de Limpieza</h1>
+        <p>Mayorista y Minorista | Calidad Profesional</p>
+    </div>
+    
+    <div class="mode-toggle">
+        <h3>Modo de Compra:</h3>
+        <div class="switch">
+            <button class="active" onclick="setMode('minorista', event)">Minorista</button>
+            <button onclick="setMode('mayorista', event)">Mayorista (Min $25.000)</button>
+        </div>
+    </div>
+
+    <div class="catalog">
+        <div class="product">
+            <h3>Desinfectante Multiuso 5L</h3>
+            <p>Ideal para superficies</p>
+            <div class="price" data-minorista="$2.500" data-mayorista="$1.800">$2.500</div>
+            <input type="number" placeholder="Cantidad" min="1" value="1">
+            <button class="add-btn" onclick="addToCart(this)">Agregar al Carrito</button>
+        </div>
+        
+        <div class="product">
+            <h3>Jabón Líquido para Manos</h3>
+            <p>Presentación 1L</p>
+            <div class="price" data-minorista="$1.200" data-mayorista="$850">$1.200</div>
+            <input type="number" placeholder="Cantidad" min="1" value="1">
+            <button class="add-btn" onclick="addToCart(this)">Agregar al Carrito</button>
+        </div>
+    </div>
+
+    <div class="delivery-options" id="delivery-options">
+        <h3>🚚 Opciones de Entrega</h3>
+        
+        <div class="option-group">
+            <label>
+                <input type="radio" name="delivery" value="retiro" onclick="toggleDeliveryOptions()">
+                Retiro en el local
+            </label>
+        </div>
+
+        <div class="option-group">
+            <label>
+                <input type="radio" name="delivery" value="domicilio" onclick="toggleDeliveryOptions()">
+                Envío a domicilio
+            </label>
+            
+            <div id="address-fields" class="hidden location-input">
+                <input type="text" id="address" placeholder="🏠 Calle, número, departamento, barrio">
+                <input type="text" id="location" placeholder="📍 Referencias de ubicación (opcional)">
+                <textarea id="notes" rows="3" placeholder="📝 Notas adicionales (horario de entrega, etc.)"></textarea>
+            </div>
+        </div>
+
+        <!-- Opción de envío de factura -->
+        <div class="contact-preferences">
+            <h4>📄 ¿Cómo desea recibir la factura?</h4>
+            
+            <div class="option-group">
+                <label>
+                    <input type="radio" name="invoice-method" value="whatsapp" checked>
+                    Enviar factura por WhatsApp
+                </label>
+            </div>
+
+            <div class="option-group">
+                <label>
+                    <input type="radio" name="invoice-method" value="email">
+                    Enviar factura por Email
+                </label>
+                <div id="email-invoice-field" class="hidden location-input">
+                    <input type="email" id="invoice-email" placeholder="correo@ejemplo.com">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="cart" onclick="showDeliveryOptions()">
+        🛒 Carrito (<span id="cart-count">0</span>) | Finalizar Pedido
+    </div>
+
+    <script>
+        let cart = [];
+        let currentMode = 'minorista';
+        let deliveryOptionsShown = false;
+        
+        // REEMPLAZA CON TU URL DE APPS SCRIPT
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/TU_URL_AQUI/exec";
+        const TIENDA_WHATSAPP = "5493525550761"; // Tu número fijo para pedidos
+        
+        function setMode(mode, evt) {
+            currentMode = mode;
+            document.querySelectorAll('.switch button').forEach(btn => btn.classList.remove('active'));
+            const btn = (evt && (evt.currentTarget || evt.target)) || null;
+            if (btn && btn.classList) btn.classList.add('active');
+
+            document.querySelectorAll('.price').forEach(el => {
+                const price = mode === 'mayorista' ? el.dataset.mayorista : el.dataset.minorista;
+                el.textContent = price;
+            });
+        }
+
+        function addToCart(button) {
+            try {
+                const productCard = button.closest('.product');
+                const titleEl = productCard.querySelector('h3');
+                const qtyInput = productCard.querySelector('input[type="number"]');
+                const product = titleEl ? titleEl.textContent.trim() : 'Producto';
+                const quantity = Math.max(1, parseInt(qtyInput.value) || 1);
+
+                cart.push({product, quantity, mode: currentMode});
+                document.getElementById('cart-count').textContent = cart.length;
+                alert('✅ Producto agregado al carrito');
+            } catch (e) {
+                console.error('addToCart error', e);
+                alert('Ocurrió un error al agregar el producto.');
+            }
+        }
+        
+        function generarNumeroPedido() {
+            const fecha = new Date();
+            return `PED-${fecha.getFullYear()}${(fecha.getMonth()+1).toString().padStart(2,'0')}${fecha.getDate().toString().padStart(2,'0')}-${fecha.getHours().toString().padStart(2,'0')}${fecha.getMinutes().toString().padStart(2,'0')}${fecha.getSeconds().toString().padStart(2,'0')}`;
+        }
+        
+        function showDeliveryOptions() {
+            if(cart.length === 0) {
+                alert('El carrito está vacío');
+                return;
+            }
+            
+            const optionsDiv = document.getElementById('delivery-options');
+            if(!deliveryOptionsShown) {
+                optionsDiv.style.display = 'block';
+                deliveryOptionsShown = true;
+            } else {
+                sendWhatsApp();
+            }
+        }
+        
+        function toggleDeliveryOptions() {
+            const addressFields = document.getElementById('address-fields');
+            const selectedOption = document.querySelector('input[name="delivery"]:checked').value;
+            
+            if(selectedOption === 'domicilio') {
+                addressFields.classList.remove('hidden');
+            } else {
+                addressFields.classList.add('hidden');
+            }
+        }
+        
+        function toggleInvoiceMethod() {
+            const emailField = document.getElementById('email-invoice-field');
+            const selectedMethod = document.querySelector('input[name="invoice-method"]:checked').value;
+            
+            if(selectedMethod === 'email') {
+                emailField.classList.remove('hidden');
+            } else {
+                emailField.classList.add('hidden');
+            }
+        }
+        
+        // Inicializar event listeners cuando carga la página
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('input[name="invoice-method"]').forEach(radio => {
+                radio.addEventListener('change', toggleInvoiceMethod);
+            });
+        });
+        
+        function validarEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+        
+        async function sendWhatsApp() {
+            const selectedOption = document.querySelector('input[name="delivery"]:checked');
+            const invoiceMethod = document.querySelector('input[name="invoice-method"]:checked').value;
+            
+            if(!selectedOption) {
+                alert('Por favor seleccione una opción de entrega');
+                return;
+            }
+            
+            // Validar email si eligió factura por email
+            let invoiceEmail = '';
+            if(invoiceMethod === 'email') {
+                invoiceEmail = document.getElementById('invoice-email').value.trim();
+                if(!invoiceEmail) {
+                    alert('Por favor ingrese el email para recibir la factura');
+                    return;
+                }
+                if(!validarEmail(invoiceEmail)) {
+                    alert('Email inválido para factura');
+                    return;
+                }
+            }
+            
+            // Mostrar estado de carga
+            const cartBtn = document.querySelector('.cart');
+            const originalText = cartBtn.innerHTML;
+            cartBtn.innerHTML = '<span class="loading">⏳ Procesando...</span>';
+            cartBtn.setAttribute('aria-busy', 'true');
+            cartBtn.style.pointerEvents = 'none';
+            cartBtn.style.opacity = '0.8';
+            
+            try {
+                const numeroPedido = generarNumeroPedido();
+                const totalItems = cart.reduce((sum, item) => sum + parseInt(item.quantity), 0);
+                
+                // Preparar datos
+                const data = {
+                    numeroPedido: numeroPedido,
+                    cliente: "Cliente Web",
+                    productos: cart,
+                    modo: currentMode.toUpperCase(),
+                    totalItems: totalItems,
+                    tipoEntrega: selectedOption.value === 'retiro' ? 'Retiro en local' : 'Envío a domicilio',
+                    direccion: '',
+                    referencias: '',
+                    notas: '',
+                    invoiceMethod: invoiceMethod,
+                    invoiceEmail: invoiceEmail
+                };
+                
+                // Si es envío a domicilio
+                if(selectedOption.value === 'domicilio') {
+                    const address = document.getElementById('address').value;
+                    if(!address) {
+                        alert('Por favor ingrese la dirección de entrega');
+                        cartBtn.innerHTML = originalText;
+                        cartBtn.disabled = false;
+                        return;
+                    }
+                    
+                    data.direccion = address;
+                    data.referencias = document.getElementById('location').value;
+                    data.notas = document.getElementById('notes').value;
+                }
+                
+                // Enviar a Google Apps Script
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if(result.status === "success") {
+                    // Abrir WhatsApp para el pedido (siempre)
+                    window.open(result.whatsappPedidoUrl, '_blank');
+                    
+                    // Mostrar mensaje según método de factura
+                    const mensaje = invoiceMethod === 'email' 
+                        ? '✅ Pedido por WhatsApp, factura enviada por email' 
+                        : '✅ Pedido y factura por WhatsApp (con enlace a PDF)';
+                    alert(mensaje);
+                    
+                    // Resetear todo
+                    cart = [];
+                    document.getElementById('cart-count').textContent = '0';
+                    document.getElementById('delivery-options').style.display = 'none';
+                    deliveryOptionsShown = false;
+                    
+                    // Limpiar campos
+                    document.getElementById('address').value = '';
+                    document.getElementById('location').value = '';
+                    document.getElementById('notes').value = '';
+                    document.getElementById('invoice-email').value = '';
+                    
+                } else {
+                    alert('❌ Error: ' + result.message);
+                }
+                
+            } catch(error) {
+                console.error('Error completo:', error);
+                alert('❌ Error de conexión. Verifica tu URL de Apps Script');
+            } finally {
+                // Restaurar botón
+                cartBtn.innerHTML = originalText;
+                cartBtn.removeAttribute('aria-busy');
+                cartBtn.style.pointerEvents = '';
+                cartBtn.style.opacity = '';
+            }
+        }
+    </script>
+</body>
+</html>
