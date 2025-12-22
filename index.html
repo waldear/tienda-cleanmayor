@@ -166,6 +166,25 @@
             const fecha = new Date();
             return `PED-${fecha.getFullYear()}${(fecha.getMonth()+1).toString().padStart(2,'0')}${fecha.getDate().toString().padStart(2,'0')}-${fecha.getHours().toString().padStart(2,'0')}${fecha.getMinutes().toString().padStart(2,'0')}${fecha.getSeconds().toString().padStart(2,'0')}`;
         }
+
+        // Genera el texto del mensaje de WhatsApp en el cliente (misma lógica que en el Apps Script)
+        function generarMensajeWhatsApp(data, pdfUrl) {
+            let message = `🛒 NUEVO PEDIDO #${data.numeroPedido}\n\n`;
+            message += `Productos:\n`;
+            (data.productos || []).forEach(item => {
+                message += `• ${item.product} (x${item.quantity})\n`;
+            });
+            message += `\nModo: ${data.modo}\n`;
+            message += `Entrega: ${data.tipoEntrega}\n`;
+            if (data.direccion) {
+                message += `Dirección: ${data.direccion}\n`;
+                if (data.referencias) message += `Referencias: ${data.referencias}\n`;
+            }
+            message += `\n📄 Factura: ${pdfUrl || ''}\n`;
+            message += `Cliente quiere factura por: ${data.invoiceMethod === 'email' ? ('Email (' + (data.invoiceEmail||'') + ')') : 'WhatsApp'}\n`;
+            message += `\nTotal de ítems: ${data.totalItems || 0}`;
+            return message;
+        }
         
         function showDeliveryOptions() {
             if(cart.length === 0) {
