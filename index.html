@@ -55,7 +55,7 @@
             <h3>Desinfectante Multiuso 5L</h3>
             <p>Ideal para superficies</p>
             <div class="price" data-minorista="$2.500" data-mayorista="$1.800">$2.500</div>
-            <input type="number" placeholder="Cantidad" min="1" value="1">
+            <input type="number" placeholder="Cantidad" min="1" value="1" aria-label="Cantidad - Desinfectante Multiuso 5L">
             <button class="add-btn" onclick="addToCart(this)">Agregar al Carrito</button>
         </div>
         
@@ -63,8 +63,8 @@
             <h3>Jabón Líquido para Manos</h3>
             <p>Presentación 1L</p>
             <div class="price" data-minorista="$1.200" data-mayorista="$850">$1.200</div>
-            <input type="number" placeholder="Cantidad" min="1" value="1">
-            <button class="add-btn" onclick="addToCart('Jabón Líquido')">Agregar al Carrito</button>
+            <input type="number" placeholder="Cantidad" min="1" value="1" aria-label="Cantidad - Jabón Líquido para Manos">
+            <button class="add-btn" onclick="addToCart(this)">Agregar al Carrito</button>
         </div>
     </div>
 
@@ -85,9 +85,9 @@
             </label>
             
             <div id="address-fields" class="hidden location-input">
-                <input type="text" id="address" placeholder="🏠 Calle, número, departamento, barrio">
-                <input type="text" id="location" placeholder="📍 Referencias de ubicación (opcional)">
-                <textarea id="notes" rows="3" placeholder="📝 Notas adicionales (horario de entrega, etc.)"></textarea>
+                <input type="text" id="address" placeholder="🏠 Calle, número, departamento, barrio" aria-label="Dirección de entrega">
+                <input type="text" id="location" placeholder="📍 Referencias de ubicación (opcional)" aria-label="Referencias de ubicación">
+                <textarea id="notes" rows="3" placeholder="📝 Notas adicionales (horario de entrega, etc.)" aria-label="Notas de entrega"></textarea>
             </div>
         </div>
 
@@ -108,15 +108,15 @@
                     Enviar factura por Email
                 </label>
                 <div id="email-invoice-field" class="hidden location-input">
-                    <input type="email" id="invoice-email" placeholder="correo@ejemplo.com">
+                    <input type="email" id="invoice-email" placeholder="correo@ejemplo.com" aria-label="Email para factura">
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="cart" onclick="showDeliveryOptions()">
+    <button class="cart" type="button" onclick="showDeliveryOptions()" aria-live="polite">
         🛒 Carrito (<span id="cart-count">0</span>) | Finalizar Pedido
-    </div>
+    </button>
 
     <script>
         let cart = [];
@@ -237,9 +237,14 @@
             const cartBtn = document.querySelector('.cart');
             const originalText = cartBtn.innerHTML;
             cartBtn.innerHTML = '<span class="loading">⏳ Procesando...</span>';
-            cartBtn.setAttribute('aria-busy', 'true');
-            cartBtn.style.pointerEvents = 'none';
-            cartBtn.style.opacity = '0.8';
+            if (cartBtn && cartBtn.tagName && cartBtn.tagName.toLowerCase() === 'button') {
+                cartBtn.disabled = true;
+                cartBtn.setAttribute('aria-busy', 'true');
+            } else {
+                cartBtn.setAttribute('aria-busy', 'true');
+                cartBtn.style.pointerEvents = 'none';
+                cartBtn.style.opacity = '0.8';
+            }
             
             try {
                 const numeroPedido = generarNumeroPedido();
@@ -266,7 +271,14 @@
                     if(!address) {
                         alert('Por favor ingrese la dirección de entrega');
                         cartBtn.innerHTML = originalText;
-                        cartBtn.disabled = false;
+                        if (cartBtn && cartBtn.tagName && cartBtn.tagName.toLowerCase() === 'button') {
+                            cartBtn.disabled = false;
+                            cartBtn.removeAttribute('aria-busy');
+                        } else {
+                            cartBtn.removeAttribute('aria-busy');
+                            cartBtn.style.pointerEvents = '';
+                            cartBtn.style.opacity = '';
+                        }
                         return;
                     }
                     
@@ -317,10 +329,15 @@
                 alert('❌ Error de conexión. Verifica tu URL de Apps Script');
             } finally {
                 // Restaurar botón
+                if (cartBtn && cartBtn.tagName && cartBtn.tagName.toLowerCase() === 'button') {
+                    cartBtn.disabled = false;
+                    cartBtn.removeAttribute('aria-busy');
+                } else {
+                    cartBtn.removeAttribute('aria-busy');
+                    cartBtn.style.pointerEvents = '';
+                    cartBtn.style.opacity = '';
+                }
                 cartBtn.innerHTML = originalText;
-                cartBtn.removeAttribute('aria-busy');
-                cartBtn.style.pointerEvents = '';
-                cartBtn.style.opacity = '';
             }
         }
     </script>
