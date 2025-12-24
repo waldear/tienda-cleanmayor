@@ -1,384 +1,532 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CleanMayor - Tienda Automatizada</title>
+    <title>CleanMayor | Tienda Premium</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f7fa; }
-        .header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 2rem; text-align: center; }
-        .mode-toggle { background: #fff; padding: 1rem; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .switch { display: inline-flex; background: #e0e0e0; border-radius: 50px; padding: 5px; }
-        .switch button { padding: 10px 25px; border: none; border-radius: 50px; cursor: pointer; background: transparent; font-weight: bold; }
-        .switch button.active { background: #1e3c72; color: white; }
-        .catalog { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; padding: 2rem; }
-        .product { background: white; border-radius: 10px; padding: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .product h3 { color: #1e3c72; margin-bottom: 10px; }
-        .price { font-size: 1.5rem; font-weight: bold; color: #2a5298; }
-        .add-btn { background: #4CAF50; color: white; padding: 10px; width: 100%; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px; }
-        .cart { position: fixed; bottom: 20px; right: 20px; background: #1e3c72; color: white; padding: 15px 25px; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        .delivery-options { background: white; padding: 2rem; margin: 1rem 2rem; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: none; }
-        .delivery-options h3 { color: #1e3c72; margin-bottom: 15px; }
-        .contact-preferences { background: #f8f9ff; padding: 1.5rem; border-radius: 8px; margin-top: 1.5rem; border: 2px solid #e3f2fd; }
-        .contact-preferences h4 { color: #1e3c72; margin-bottom: 15px; }
-        .option-group { margin-bottom: 15px; }
-        .option-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
-        .option-group input[type="radio"] { margin-right: 10px; }
-        .option-group input[type="text"],
-        .option-group input[type="email"],
-        .option-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-top: 5px; }
-        .hidden { display: none; }
-        .location-input { margin-top: 10px; }
-        .loading { animation: pulse 1s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-        .error { color: #d32f2f; font-size: 0.85rem; margin-top: 5px; }
+        :root {
+            --primary: #1e3c72;
+            --primary-light: #2a5298;
+            --accent: #4CAF50;
+            --bg: #f8fafc;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --white: #ffffff;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 3rem 1rem;
+            text-align: center;
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .search-container {
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            padding: 0 1rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            border-radius: 2rem;
+            border: none;
+            box-shadow: var(--shadow);
+            font-size: 1rem;
+            outline: none;
+            transition: box-shadow 0.3s;
+        }
+
+        .search-input:focus {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .mode-container {
+            max-width: 400px;
+            margin: -2rem auto 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .mode-toggle {
+            background: var(--white);
+            padding: 0.5rem;
+            border-radius: 1rem;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .mode-toggle button {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            background: transparent;
+            font-weight: 600;
+            color: var(--text-light);
+            transition: all 0.3s;
+        }
+
+        .mode-toggle button.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem 5rem;
+        }
+
+        .catalog {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .product {
+            background: var(--white);
+            border-radius: 1.25rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product:hover {
+            transform: translateY(-5px);
+        }
+
+        .product h3 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .product p {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            flex-grow: 1;
+            margin-bottom: 1rem;
+        }
+
+        .price {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .qty-controls {
+            display: flex;
+            align-items: center;
+            background: #f1f5f9;
+            border-radius: 0.5rem;
+            padding: 0.25rem;
+        }
+
+        .qty-controls button {
+            background: var(--white);
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 0.4rem;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .qty-controls input {
+            width: 40px;
+            text-align: center;
+            border: none;
+            background: transparent;
+            font-weight: 600;
+        }
+
+        .add-btn {
+            background: var(--primary);
+            color: white;
+            padding: 0.9rem;
+            width: 100%;
+            border: none;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            margin-top: 1rem;
+            font-weight: 600;
+        }
+
+        .cart-float {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(30, 60, 114, 0.4);
+            display: none;
+            align-items: center;
+            gap: 1rem;
+            z-index: 100;
+            border: none;
+        }
+
+        .delivery-card {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            display: none;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .input-premium {
+            width: 100%;
+            padding: 0.85rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            font-family: inherit;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .radio-box {
+            flex: 1;
+            border: 2px solid #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .radio-box.selected {
+            border-color: var(--primary);
+            background: #eff6ff;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .loader-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .catalog {
+                grid-template-columns: 1fr;
+            }
+
+            .radio-group {
+                flex-direction: column;
+            }
+        }
     </style>
-<base target="_blank">
 </head>
+
 <body>
+    <div id="loader" class="loader-container">
+        <div class="spinner"></div>
+        <p>Procesando pedido...</p>
+    </div>
+
     <div class="header">
-        <h1>🧽 CleanMayor - Productos de Limpieza</h1>
-        <p>Mayorista y Minorista | Calidad Profesional</p>
-    </div>
-    
-    <div class="mode-toggle">
-        <h3>Modo de Compra:</h3>
-        <div class="switch">
-            <button class="active" onclick="setMode('minorista', event)">Minorista</button>
-            <button onclick="setMode('mayorista', event)">Mayorista (Min $25.000)</button>
-        </div>
+        <h1>CleanMayor</h1>
+        <p>Limpieza Profesional | Mayorista y Minorista</p>
     </div>
 
-    <div class="catalog">
-        <div class="product">
-            <h3>Desinfectante Multiuso 5L</h3>
-            <p>Ideal para superficies</p>
-            <div class="price" data-minorista="$2.500" data-mayorista="$1.800">$2.500</div>
-            <input type="number" placeholder="Cantidad" min="1" value="1" aria-label="Cantidad - Desinfectante Multiuso 5L">
-            <button class="add-btn" onclick="addToCart(this)">Agregar al Carrito</button>
-        </div>
-        
-        <div class="product">
-            <h3>Jabón Líquido para Manos</h3>
-            <p>Presentación 1L</p>
-            <div class="price" data-minorista="$1.200" data-mayorista="$850">$1.200</div>
-            <input type="number" placeholder="Cantidad" min="1" value="1" aria-label="Cantidad - Jabón Líquido para Manos">
-            <button class="add-btn" onclick="addToCart(this)">Agregar al Carrito</button>
+    <div class="search-container">
+        <input type="text" id="search" class="search-input" placeholder="🔍 Buscar productos..."
+            oninput="renderCatalog()">
+    </div>
+
+    <div class="mode-container">
+        <div class="mode-toggle">
+            <button id="btn-minorista" class="active" onclick="setMode('minorista')">Minorista</button>
+            <button id="btn-mayorista" onclick="setMode('mayorista')">Mayorista (Min $25.000)</button>
         </div>
     </div>
 
-    <div class="delivery-options" id="delivery-options">
-        <h3>🚚 Opciones de Entrega</h3>
-        
-        <div class="option-group">
-            <label>
-                <input type="radio" name="delivery" value="retiro" onclick="toggleDeliveryOptions()">
-                Retiro en el local
-            </label>
+    <div class="main-container">
+        <div id="catalog" class="catalog">
+            <p style="grid-column: 1/-1; text-align: center;">Cargando productos...</p>
         </div>
 
-        <div class="option-group">
-            <label>
-                <input type="radio" name="delivery" value="domicilio" onclick="toggleDeliveryOptions()">
-                Envío a domicilio
-            </label>
-            
-            <div id="address-fields" class="hidden location-input">
-                <input type="text" id="address" placeholder="🏠 Calle, número, departamento, barrio" aria-label="Dirección de entrega">
-                <input type="text" id="location" placeholder="📍 Referencias de ubicación (opcional)" aria-label="Referencias de ubicación">
-                <textarea id="notes" rows="3" placeholder="📝 Notas adicionales (horario de entrega, etc.)" aria-label="Notas de entrega"></textarea>
-            </div>
-        </div>
-
-        <!-- Opción de envío de factura -->
-        <div class="contact-preferences">
-            <h4>📄 ¿Cómo desea recibir la factura?</h4>
-            
-            <div class="option-group">
-                <label>
-                    <input type="radio" name="invoice-method" value="whatsapp" checked>
-                    Enviar factura por WhatsApp
-                </label>
+        <div id="delivery-options" class="delivery-card">
+            <h3>🛒 Finalizar Pedido</h3>
+            <br>
+            <div class="form-group">
+                <label class="form-label">Nombre y Apellido *</label>
+                <input type="text" id="client-name" class="input-premium" placeholder="Escribe tu nombre completo">
             </div>
 
-            <div class="option-group">
-                <label>
-                    <input type="radio" name="invoice-method" value="email">
-                    Enviar factura por Email
-                </label>
-                <div id="email-invoice-field" class="hidden location-input">
-                    <input type="email" id="invoice-email" placeholder="correo@ejemplo.com" aria-label="Email para factura">
+            <div class="form-group">
+                <label class="form-label">WhatsApp de contacto *</label>
+                <input type="tel" id="client-phone" class="input-premium" placeholder="Ej: 3525550761">
+            </div>
+
+            <div class="form-label">¿Cómo quieres tu pedido?</div>
+            <div class="radio-group">
+                <div class="radio-box" id="box-retiro" onclick="setDelivery('retiro')">Retiro en Local</div>
+                <div class="radio-box" id="box-domicilio" onclick="setDelivery('domicilio')">Envío a Domicilio</div>
+            </div>
+
+            <div id="address-fields" class="hidden">
+                <div class="form-group">
+                    <label class="form-label">Dirección de entrega</label>
+                    <input type="text" id="address" class="input-premium" placeholder="Calle, número, barrio...">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Notas adicionales</label>
+                    <textarea id="notes" class="input-premium" rows="2"
+                        placeholder="Indicaciones para el repartidor..."></textarea>
                 </div>
             </div>
+
+            <button class="add-btn" style="background: var(--accent);" onclick="submitOrder()">
+                CONFIRMAR POR WHATSAPP
+            </button>
+            <button class="add-btn" style="background: #e2e8f0; color: var(--text);" onclick="hideCheckout()">
+                SEGUIR COMPRANDO
+            </button>
         </div>
     </div>
 
-    <button class="cart" type="button" onclick="showDeliveryOptions()" aria-live="polite">
-        🛒 Carrito (<span id="cart-count">0</span>) | Finalizar Pedido
+    <button id="cart-float" class="cart-float" onclick="showCheckout()">
+        <span>🛒 Finalizar Pedido</span>
+        <span id="cart-total" style="font-weight: 700;">$0</span>
     </button>
 
     <script>
-        let cart = [];
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbmmyshiZHDhgdkD-2It5SPFmUorDAQAuRZjFJIE4wg3Wg136LgETJj66Voy83y5pZVhg/exec";
+        const WHATSAPP = "5493525550761";
+
+        let dbProducts = [];
+        let cart = {};
         let currentMode = 'minorista';
-        let deliveryOptionsShown = false;
-        
-        // CONFIGURACIÓN
-        const CONFIG = {
-            WHATSAPP_NUMBER: "5493525550761",
-            GOOGLE_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbwacOBS_s1rXP14VHw2z8-utVrHH56d9FG9sjUWmTd9ZnLNYQS83M0gXaUmy1U-I656/exec"
-        };
-        // Compatibilidad: alias global esperado por funciones antiguas
-        const GOOGLE_SCRIPT_URL = CONFIG.GOOGLE_SCRIPT_URL;
-        // Alias por compatibilidad con código previo
-        const GOOGLE_SCRIPT_URL = CONFIG.GOOGLE_SCRIPT_URL;
-        
-        function setMode(mode, evt) {
-            currentMode = mode;
-            document.querySelectorAll('.switch button').forEach(btn => btn.classList.remove('active'));
-            const btn = (evt && (evt.currentTarget || evt.target)) || null;
-            if (btn && btn.classList) btn.classList.add('active');
+        let deliveryMode = '';
 
-            document.querySelectorAll('.price').forEach(el => {
-                const price = mode === 'mayorista' ? el.dataset.mayorista : el.dataset.minorista;
-                el.textContent = price;
-            });
-        }
+        document.addEventListener('DOMContentLoaded', fetchProducts);
 
-        function addToCart(button) {
+        async function fetchProducts() {
             try {
-                const productCard = button.closest('.product');
-                const titleEl = productCard.querySelector('h3');
-                const qtyInput = productCard.querySelector('input[type="number"]');
-                const product = titleEl ? titleEl.textContent.trim() : 'Producto';
-                const quantity = Math.max(1, parseInt(qtyInput.value) || 1);
-
-                cart.push({product, quantity, mode: currentMode});
-                document.getElementById('cart-count').textContent = cart.length;
-                alert('✅ Producto agregado al carrito');
+                const res = await fetch(SCRIPT_URL);
+                const json = await res.json();
+                if (json.status === 'success') {
+                    dbProducts = json.data;
+                    renderCatalog();
+                }
             } catch (e) {
-                console.error('addToCart error', e);
-                alert('Ocurrió un error al agregar el producto.');
+                document.getElementById('catalog').innerHTML = '<p>Error cargando productos. Revisa tu conexión.</p>';
             }
         }
-        
-        function generarNumeroPedido() {
-            const fecha = new Date();
-            return `PED-${fecha.getFullYear()}${(fecha.getMonth()+1).toString().padStart(2,'0')}${fecha.getDate().toString().padStart(2,'0')}-${fecha.getHours().toString().padStart(2,'0')}${fecha.getMinutes().toString().padStart(2,'0')}${fecha.getSeconds().toString().padStart(2,'0')}`;
-        }
 
-        // Genera el texto del mensaje de WhatsApp en el cliente (misma lógica que en el Apps Script)
-        function generarMensajeWhatsApp(data, pdfUrl) {
-            let message = `🛒 NUEVO PEDIDO #${data.numeroPedido}\n\n`;
-            message += `Productos:\n`;
-            (data.productos || []).forEach(item => {
-                message += `• ${item.product} (x${item.quantity})\n`;
+        function renderCatalog() {
+            const container = document.getElementById('catalog');
+            const searchTerm = document.getElementById('search').value.toLowerCase();
+            container.innerHTML = '';
+
+            const filtered = dbProducts.filter(p => p.name.toLowerCase().includes(searchTerm));
+
+            filtered.forEach((p, index) => {
+                const price = currentMode === 'minorista' ? p.priceMinorista : p.priceMayorista;
+                const card = document.createElement('div');
+                card.className = 'product';
+                card.innerHTML = `
+                    <h3>${p.name}</h3>
+                    <p>${p.description || 'Calidad CleanMayor'}</p>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: auto;">
+                        <div class="price">$${Number(price).toLocaleString('es-AR')}</div>
+                        <div class="qty-controls">
+                            <button onclick="updateQty('${p.name}', -1)">-</button>
+                            <input type="number" value="${cart[p.name] || 0}" readonly>
+                            <button onclick="updateQty('${p.name}', 1)">+</button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
             });
-            message += `\nModo: ${data.modo}\n`;
-            message += `Entrega: ${data.tipoEntrega}\n`;
-            if (data.direccion) {
-                message += `Dirección: ${data.direccion}\n`;
-                if (data.referencias) message += `Referencias: ${data.referencias}\n`;
-            }
-            message += `\n📄 Factura: ${pdfUrl || ''}\n`;
-            message += `Cliente quiere factura por: ${data.invoiceMethod === 'email' ? ('Email (' + (data.invoiceEmail||'') + ')') : 'WhatsApp'}\n`;
-            message += `\nTotal de ítems: ${data.totalItems || 0}`;
-            return message;
         }
-        
-        function showDeliveryOptions() {
-            if(cart.length === 0) {
-                alert('El carrito está vacío');
-                return;
-            }
-            
-            const optionsDiv = document.getElementById('delivery-options');
-            if(!deliveryOptionsShown) {
-                optionsDiv.style.display = 'block';
-                deliveryOptionsShown = true;
-            } else {
-                sendWhatsApp();
-            }
+
+        function updateQty(name, delta) {
+            cart[name] = Math.max(0, (cart[name] || 0) + delta);
+            if (cart[name] === 0) delete cart[name];
+            renderCatalog();
+            updateCartUI();
         }
-        
-        function toggleDeliveryOptions() {
-            const addressFields = document.getElementById('address-fields');
-            const selectedOption = document.querySelector('input[name="delivery"]:checked').value;
-            
-            if(selectedOption === 'domicilio') {
-                addressFields.classList.remove('hidden');
-            } else {
-                addressFields.classList.add('hidden');
-            }
-        }
-        
-        function toggleInvoiceMethod() {
-            const emailField = document.getElementById('email-invoice-field');
-            const selectedMethod = document.querySelector('input[name="invoice-method"]:checked').value;
-            
-            if(selectedMethod === 'email') {
-                emailField.classList.remove('hidden');
-            } else {
-                emailField.classList.add('hidden');
-            }
-        }
-        
-        // Inicializar event listeners cuando carga la página
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('input[name="invoice-method"]').forEach(radio => {
-                radio.addEventListener('change', toggleInvoiceMethod);
+
+        function updateCartUI() {
+            let total = 0;
+            let count = 0;
+            Object.keys(cart).forEach(name => {
+                const p = dbProducts.find(item => item.name === name);
+                const price = currentMode === 'minorista' ? p.priceMinorista : p.priceMayorista;
+                total += cart[name] * price;
+                count += cart[name];
             });
-        });
-        
-        function validarEmail(email) {
-            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return re.test(email);
+            document.getElementById('cart-total').textContent = `$${total.toLocaleString('es-AR')}`;
+            document.getElementById('cart-float').style.display = count > 0 ? 'flex' : 'none';
         }
-        
-        async function sendWhatsApp() {
-            const selectedOption = document.querySelector('input[name="delivery"]:checked');
-            const invoiceMethod = document.querySelector('input[name="invoice-method"]:checked').value;
-            
-            if(!selectedOption) {
-                alert('Por favor seleccione una opción de entrega');
-                return;
-            }
-            
-            // Validar email si eligió factura por email
-            let invoiceEmail = '';
-            if(invoiceMethod === 'email') {
-                invoiceEmail = document.getElementById('invoice-email').value.trim();
-                if(!invoiceEmail) {
-                    alert('Por favor ingrese el email para recibir la factura');
-                    return;
-                }
-                if(!validarEmail(invoiceEmail)) {
-                    alert('Email inválido para factura');
-                    return;
-                }
-            }
-            
-            // Mostrar estado de carga
-            const cartBtn = document.querySelector('.cart');
-            const originalText = cartBtn.innerHTML;
-            cartBtn.innerHTML = '<span class="loading">⏳ Procesando...</span>';
-            if (cartBtn && cartBtn.tagName && cartBtn.tagName.toLowerCase() === 'button') {
-                cartBtn.disabled = true;
-                cartBtn.setAttribute('aria-busy', 'true');
-            } else {
-                cartBtn.setAttribute('aria-busy', 'true');
-                cartBtn.style.pointerEvents = 'none';
-                cartBtn.style.opacity = '0.8';
-            }
-            
-            try {
-                const numeroPedido = generarNumeroPedido();
-                const totalItems = cart.reduce((sum, item) => sum + parseInt(item.quantity), 0);
-                
-                // Preparar datos
-                const data = {
-                    numeroPedido: numeroPedido,
-                    cliente: "Cliente Web",
-                    productos: cart,
-                    modo: currentMode.toUpperCase(),
-                    totalItems: totalItems,
-                    tipoEntrega: selectedOption.value === 'retiro' ? 'Retiro en local' : 'Envío a domicilio',
-                    direccion: '',
-                    referencias: '',
-                    notas: '',
-                    invoiceMethod: invoiceMethod,
-                    invoiceEmail: invoiceEmail
-                };
-                
-                // Si es envío a domicilio
-                if(selectedOption.value === 'domicilio') {
-                    const address = document.getElementById('address').value;
-                    if(!address) {
-                        alert('Por favor ingrese la dirección de entrega');
-                        cartBtn.innerHTML = originalText;
-                        if (cartBtn && cartBtn.tagName && cartBtn.tagName.toLowerCase() === 'button') {
-                            cartBtn.disabled = false;
-                            cartBtn.removeAttribute('aria-busy');
-                        } else {
-                            cartBtn.removeAttribute('aria-busy');
-                            cartBtn.style.pointerEvents = '';
-                            cartBtn.style.opacity = '';
-                        }
-                        return;
-                    }
-                    
-                    data.direccion = address;
-                    data.referencias = document.getElementById('location').value;
-                    data.notas = document.getElementById('notes').value;
-                }
-                
-                // Enviar a Google Apps Script
-                // Enviar mediante formulario oculto a un iframe para evitar CORS
-                console.log('Enviando a (form):', GOOGLE_SCRIPT_URL);
-                const iframeName = 'gs_post_iframe';
-                let iframe = document.getElementById(iframeName);
-                if (!iframe) {
-                    iframe = document.createElement('iframe');
-                    iframe.style.display = 'none';
-                    iframe.id = iframeName;
-                    iframe.name = iframeName;
-                    document.body.appendChild(iframe);
-                }
 
-                const form = document.createElement('form');
-                form.style.display = 'none';
-                form.method = 'POST';
-                form.action = GOOGLE_SCRIPT_URL;
-                form.target = iframeName;
+        function setMode(mode) {
+            currentMode = mode;
+            document.getElementById('btn-minorista').classList.toggle('active', mode === 'minorista');
+            document.getElementById('btn-mayorista').classList.toggle('active', mode === 'mayorista');
+            renderCatalog();
+            updateCartUI();
+        }
 
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'payload';
-                input.value = JSON.stringify(data);
-                form.appendChild(input);
+        function showCheckout() {
+            document.getElementById('catalog').style.display = 'none';
+            document.querySelector('.search-container').style.display = 'none';
+            document.getElementById('delivery-options').style.display = 'block';
+            document.getElementById('cart-float').style.display = 'none';
+        }
 
-                document.body.appendChild(form);
-                form.submit();
-                document.body.removeChild(form);
+        function hideCheckout() {
+            document.getElementById('catalog').style.display = 'grid';
+            document.querySelector('.search-container').style.display = 'block';
+            document.getElementById('delivery-options').style.display = 'none';
+            updateCartUI();
+        }
 
-                // Abrir WhatsApp inmediatamente (no dependemos de la respuesta por CORS)
-                const whatsappUrl = `https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(generarMensajeWhatsApp(data, '#'))}`;
-                window.open(whatsappUrl, '_blank');
+        function setDelivery(type) {
+            deliveryMode = type;
+            document.getElementById('box-retiro').classList.toggle('selected', type === 'retiro');
+            document.getElementById('box-domicilio').classList.toggle('selected', type === 'domicilio');
+            document.getElementById('address-fields').classList.toggle('hidden', type !== 'domicilio');
+        }
 
-                const mensaje = invoiceMethod === 'email' 
-                    ? '✅ Pedido enviado por WhatsApp, factura será enviada por email' 
-                    : '✅ Pedido enviado por WhatsApp';
-                alert(mensaje);
+        async function submitOrder() {
+            const name = document.getElementById('client-name').value;
+            const phone = document.getElementById('client-phone').value;
+            if (!name || !phone) return alert("Completa tu nombre y teléfono");
+            if (!deliveryMode) return alert("Elige un método de entrega");
 
-                // Resetear todo
-                cart = [];
-                document.getElementById('cart-count').textContent = '0';
-                document.getElementById('delivery-options').style.display = 'none';
-                deliveryOptionsShown = false;
+            document.getElementById('loader').style.display = 'flex';
 
-                // Limpiar campos
-                document.getElementById('address').value = '';
-                document.getElementById('location').value = '';
-                document.getElementById('notes').value = '';
-                document.getElementById('invoice-email').value = '';
-                
-            } catch(error) {
-                console.error('Error completo:', error);
-                const msg = error && error.message ? error.message : String(error);
-                alert('❌ Ocurrió un error: ' + msg + '\nRevisa la consola (F12) para más detalles.');
-            } finally {
-                // Restaurar botón
-                if (cartBtn && cartBtn.tagName && cartBtn.tagName.toLowerCase() === 'button') {
-                    cartBtn.disabled = false;
-                    cartBtn.removeAttribute('aria-busy');
-                } else {
-                    cartBtn.removeAttribute('aria-busy');
-                    cartBtn.style.pointerEvents = '';
-                    cartBtn.style.opacity = '';
-                }
-                cartBtn.innerHTML = originalText;
-            }
+            const data = {
+                numeroPedido: "PED-" + Date.now(),
+                clienteNombre: name,
+                clienteTelefono: phone,
+                productos: Object.keys(cart).map(n => ({ product: n, quantity: cart[n] })),
+                modo: currentMode.toUpperCase(),
+                totalItems: Object.values(cart).reduce((a, b) => a + b, 0),
+                tipoEntrega: deliveryMode === 'retiro' ? 'Retiro' : 'Domicilio',
+                direccion: document.getElementById('address').value,
+                referencias: '',
+                notas: document.getElementById('notes').value,
+                invoiceMethod: 'WhatsApp'
+            };
+
+            // Envío por formulario silencioso
+            const iframe = document.createElement('iframe');
+            iframe.name = 'hidden_iframe';
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = SCRIPT_URL;
+            form.target = 'hidden_iframe';
+            const input = document.createElement('input');
+            input.name = 'payload';
+            input.value = JSON.stringify(data);
+            form.appendChild(input);
+            document.body.appendChild(form);
+            form.submit();
+
+            setTimeout(() => {
+                const msg = `🛒 *NUEVO PEDIDO #${data.numeroPedido}*\n\nHola! Soy ${name}.\nEste es mi pedido:\n` +
+                    data.productos.map(p => `- ${p.product} (x${p.quantity})`).join('\n') +
+                    `\n\n*Entrega:* ${data.tipoEntrega}` + (data.direccion ? `\n*Dirección:* ${data.direccion}` : '');
+
+                window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`, '_blank');
+                location.reload();
+            }, 2000);
         }
     </script>
 </body>
+
 </html>

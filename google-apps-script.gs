@@ -1,88 +1,102 @@
-// ================= CONFIGURACIÓN - TUS IDs REALES =================
+// ================= CONFIGURACIÓN - TUS IDs REALES DETECTADOS =================
 const CONFIG = {
-  SHEET_NAME: "Pedidos",
+  PRODUCTOS_SS_ID: "1dOOsiDPYdMUrxOevef4GYfD4EPrbFeDrrvwDEXhtMh8",
+  PEDIDOS_SS_ID: "1TqvsXWTIaCsyL1383EsNGTLoYsmeA5hO-i8Hadot-go",
   DOC_TEMPLATE_ID: "1xq9cNo13P3oO3noINnckOpQezL6XYMRZiR73kZWCpQU",
   PDF_FOLDER_ID: "1-YBWiDJAnN1qs_dLRvE0cnFB1x4WA0eh",
-  WHATSAPP_NUMBER: "5493525550761",
-  EMAIL_FROM: "ramirez.waldemar@gmail.com"
+  WHATSAPP_NUMBER: "5493525550761"
 };
 // ====================================================================
 
+function doGet() {
+  try {
+    const ss = SpreadsheetApp.openById(CONFIG.PRODUCTOS_SS_ID);
+    const sheet = ss.getSheets()[0];
+    const values = sheet.getDataRange().getValues();
+    const headers = values.shift();
+    
+    const productos = values.map(row => {
+      let obj = {};
+      headers.forEach((h, i) => {
+        const key = h.toString().toLowerCase().trim();
+        if (key === 'nombre') obj.name = row[i];
+        if (key === 'precio_minorista') obj.priceMinorista = row[i];
+        if (key === 'precio_mayorista') obj.priceMayorista = row[i];
+        if (key === 'id') obj.id = row[i];
+        if (key.includes('imagen') || key.includes('link')) obj.image = row[i];
+        if (key.includes('categor')) obj.category = row[i];
+        if (key.includes('descrip')) obj.description = row[i];
+      });
+      return obj;
+    }).filter(p => p.name); // Filtrar filas vacías
+    
+    return ContentService.createTextOutput(JSON.stringify({status: "success", data: productos}))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({status: "error", message: error.toString()}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
 function doPost(e) {
   try {
-    // Aceptar JSON directo o formulario con campo 'payload' (para evitar problemas CORS desde el navegador)
     let data;
     if (e.postData && e.postData.contents) {
       data = JSON.parse(e.postData.contents);
     } else if (e.parameter && e.parameter.payload) {
       data = JSON.parse(e.parameter.payload);
     } else {
-      data = {};
+      throw new Error("No se recibieron datos");
     }
     
-    // 1. Guardar en Sheets
-    guardarEnSheets(data);
+    // 1. Guardar en Hoja de Pedidos
+    const ssPedidos = SpreadsheetApp.openById(CONFIG.PEDIDOS_SS_ID);
+    const sheetPedidos = ssPedidos.getSheets()[0];
     
-    // 2. Generar PDF
+    sheetPedidos.appendRow([
+      new Date(),
+      data.numeroPedido,
+      data.productos.map(p => `${p.product} (x${p.quantity})`).join(", "),
+      data.modo,
+      data.totalItems,
+      data.tipoEntrega,
+      data.direccion || "Retiro",
+      data.referencias || "",
+      data.notas || "",
+      data.invoiceMethod,
+      data.invoiceEmail || "",
+      data.clienteNombre || "",
+      data.clienteTelefono || ""
+    ]);
+    
+    // 2. Generar Factura PDF
     const pdfUrl = generarFacturaPDF(data);
     
-    // 3. Enviar email con factura si eligió esa opción
-    if(data.invoiceMethod === 'email' && data.invoiceEmail) {
-      enviarEmailConFactura(data, pdfUrl);
-    }
-    
-    // 4. Generar URL de WhatsApp para TI (el pedido siempre va a tu número)
+    // 3. Respuesta
     const whatsappPedidoUrl = `https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(generarMensajeWhatsApp(data, pdfUrl))}`;
     
-    // 5. Respuesta exitosa
-    return ContentService.createTextOutput(
-      JSON.stringify({
-        status: "success",
-        pdfUrl: pdfUrl,
-        whatsappPedidoUrl: whatsappPedidoUrl,
-        message: data.invoiceMethod === 'email' 
-          ? 'Pedido por WhatsApp, factura enviada por email' 
-          : 'Pedido y factura por WhatsApp'
-      })
-    ).setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(JSON.stringify({
+      status: "success", 
+      pdfUrl: pdfUrl,
+      whatsappPedidoUrl: whatsappPedidoUrl
+    })).setMimeType(ContentService.MimeType.JSON);
     
   } catch(error) {
-    return ContentService.createTextOutput(
-      JSON.stringify({status: "error", message: error.toString()})
-    ).setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(JSON.stringify({status: "error", message: error.toString()}))
+      .setMimeType(ContentService.MimeType.JSON);
   }
-}
-
-function guardarEnSheets(data) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.SHEET_NAME);
-  
-  sheet.appendRow([
-    new Date(),
-    data.numeroPedido,
-    data.productos.map(p => `${p.product} (x${p.quantity})`).join(", "),
-    data.modo,
-    data.totalItems,
-    data.tipoEntrega,
-    data.direccion || "Retiro en local",
-    data.referencias || "",
-    data.notas || "",
-    data.invoiceMethod === 'whatsapp' ? 'WhatsApp' : 'Email',
-    data.invoiceEmail || ""
-  ]);
 }
 
 function generarFacturaPDF(data) {
   const template = DriveApp.getFileById(CONFIG.DOC_TEMPLATE_ID);
   const folder = DriveApp.getFolderById(CONFIG.PDF_FOLDER_ID);
-  
   const copia = template.makeCopy(`Factura_${data.numeroPedido}`, folder);
   const doc = DocumentApp.openById(copia.getId());
   const body = doc.getBody();
   
-  // Reemplazar marcadores
   body.replaceText("{{NUMERO_PEDIDO}}", data.numeroPedido);
   body.replaceText("{{FECHA}}", new Date().toLocaleDateString("es-AR"));
-  body.replaceText("{{CLIENTE}}", data.invoiceEmail || "Cliente Web");
+  body.replaceText("{{CLIENTE}}", data.clienteNombre || "Cliente Web");
   body.replaceText("{{PRODUCTOS}}", data.productos.map(p => `• ${p.product} (x${p.quantity})`).join("\n"));
   body.replaceText("{{MODO}}", data.modo);
   body.replaceText("{{ENTREGA}}", data.tipoEntrega);
@@ -97,52 +111,18 @@ function generarFacturaPDF(data) {
   return pdfFile.getUrl();
 }
 
-function enviarEmailConFactura(data, pdfUrl) {
-  const pdfFile = DriveApp.getFilesByName(`Factura_${data.numeroPedido}.pdf`).next();
-  
-  MailApp.sendEmail({
-    to: data.invoiceEmail,
-    subject: `Factura de Pedido #${data.numeroPedido} - CleanMayor`,
-    htmlBody: `
-      <h2>🛒 Factura de tu Pedido - CleanMayor</h2>
-      <p><strong>Número de Pedido:</strong> ${data.numeroPedido}</p>
-      <p><strong>Fecha:</strong> ${new Date().toLocaleString("es-AR")}</p>
-      <p><strong>Total de ítems:</strong> ${data.totalItems}</p>
-      <p><strong>Tipo de entrega:</strong> ${data.tipoEntrega}</p>
-      ${data.direccion ? `<p><strong>Dirección:</strong> ${data.direccion}</p>` : ''}
-      
-      <h3>Productos:</h3>
-      <ul>
-        ${data.productos.map(p => `<li>${p.product} (x${p.quantity}) - ${data.modo}</li>`).join('')}
-      </ul>
-      
-      <p><a href="${pdfUrl}" style="background: #1e3c72; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block;">📄 Descargar Factura PDF</a></p>
-      
-      <hr>
-      <p style="color: #666; font-size: 12px;">Gracias por tu compra en CleanMayor<br>WhatsApp: ${CONFIG.WHATSAPP_NUMBER}</p>
-      <p style="color: #666; font-size: 12px;">¿Consultas? Escríbenos por WhatsApp</p>
-    `,
-    attachments: [pdfFile]
-  });
-}
-
 function generarMensajeWhatsApp(data, pdfUrl) {
   let message = `🛒 *NUEVO PEDIDO #${data.numeroPedido}* 🛒\n\n`;
+  message += `👤 *Cliente:* ${data.clienteNombre}\n`;
+  message += `📞 *Tel:* ${data.clienteTelefono}\n\n`;
   message += `*Productos:*\n`;
   data.productos.forEach(item => {
     message += `• ${item.product} (x${item.quantity})\n`;
   });
   message += `\n*Modo:* ${data.modo}\n`;
   message += `*Entrega:* ${data.tipoEntrega}\n`;
-  
-  if(data.direccion) {
-    message += `*Dirección:* ${data.direccion}\n`;
-    if(data.referencias) message += `*Referencias:* ${data.referencias}\n`;
-  }
-  
+  if(data.direccion) message += `*Dirección:* ${data.direccion}\n`;
   message += `\n*📄 Factura:* ${pdfUrl}\n`;
-  message += `*Cliente quiere factura por:* ${data.invoiceMethod === 'email' ? 'Email (' + data.invoiceEmail + ')' : 'WhatsApp'}\n`;
   message += `\n*Total de ítems:* ${data.totalItems}`;
-  
   return message;
 }
