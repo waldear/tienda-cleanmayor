@@ -18,17 +18,15 @@ function doGet() {
     const productos = values.map(row => {
       let obj = {};
       headers.forEach((h, i) => {
-        const key = h.toString().toLowerCase().trim();
+        const key = h.toString().toLowerCase().replace(/_/g, " ").trim();
         if (key === 'nombre') obj.name = row[i];
-        if (key === 'precio_minorista') obj.priceMinorista = row[i];
-        if (key === 'precio_mayorista') obj.priceMayorista = row[i];
-        if (key === 'id') obj.id = row[i];
-        if (key.includes('imagen') || key.includes('link')) obj.image = row[i];
-        if (key.includes('categor')) obj.category = row[i];
-        if (key.includes('descrip')) obj.description = row[i];
+        if (key === 'precio minorista' || key.includes('minorista')) obj.priceMinorista = row[i];
+        if (key === 'precio mayorista' || key.includes('mayorista')) obj.priceMayorista = row[i];
+        if (key === 'imagen' || key === 'foto' || key.includes('imagen')) obj.image = row[i];
+        if (key === 'descripcion' || key.includes('descrip')) obj.description = row[i];
       });
       return obj;
-    }).filter(p => p.name); // Filtrar filas vacías
+    }).filter(p => p.name);
     
     return ContentService.createTextOutput(JSON.stringify({status: "success", data: productos}))
       .setMimeType(ContentService.MimeType.JSON);
