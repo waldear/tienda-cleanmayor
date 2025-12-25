@@ -616,30 +616,42 @@
                 invoiceMethod: 'WhatsApp'
             };
 
-            // Post silent using form if needed, but let's try fetch with mode no-cors
             try {
-                await fetch(SCRIPT_URL, {
+                // Usamos un formulario oculto o una petición que el servidor GAS pueda procesar para devolver JSON
+                // Nota: Debido a CORS, fetch puede no recibir la respuesta si no está configurado como 'no-cors'
+                // Pero 'no-cors' no nos deja ver el JSON. Usaremos una técnica de fallback.
+
+                const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'no-cors',
                     body: JSON.stringify(orderData)
                 });
+
+                const result = await response.json();
+
+                if (result.status === 'success' && result.whatsappPedidoUrl) {
+                    window.open(result.whatsappPedidoUrl, '_blank');
+                } else {
+                    throw new Error("Respuesta no exitosa");
+                }
             } catch (e) {
-                console.log("Error sending post", e);
-            }
+                console.log("Error detallado enviando el pedido:", e);
+                // Fallback: Si el servidor falla o hay CORS, abrimos WhatsApp con el texto básico para no perder la venta
+                let text = `👋 *¡Hola CleanMayor!* \nQuisiera realizar el siguiente pedido:\n\n`;
+                orderData.productos.forEach(i => {
+                    text += `• ${i.product} (x${i.quantity})\n`;
+                });
+                text += `\n📍 *Entrega:* ${orderData.tipoEntrega}${address ? ` (${address})` : ''}`;
+                text += `\n👤 *Cliente:* ${name}`;
+                text += `\n\n_(Nota: Hubo un problema al generar la factura PDF, pero te envío el pedido por aquí)_`;
 
-            let text = `👋 *¡Hola CleanMayor!* \nQuisiera realizar el siguiente pedido:\n\n`;
-            orderData.productos.forEach(i => {
-                text += `• ${i.product} (x${i.quantity})\n`;
-            });
-            text += `\n📍 *Entrega:* ${orderData.tipoEntrega}${address ? ` (${address})` : ''}`;
-            text += `\n👤 *Cliente:* ${name}`;
-
-            const waUrl = `https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(text)}`;
-
-            setTimeout(() => {
+                const waUrl = `https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(text)}`;
                 window.open(waUrl, '_blank');
-                location.reload();
-            }, 1000);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                setTimeout(() => {
+                    location.reload();
+                }, 500);
+            }
         }
 
         document.addEventListener('DOMContentLoaded', loadShop);
