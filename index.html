@@ -616,41 +616,30 @@
                 invoiceMethod: 'WhatsApp'
             };
 
-            try {
-                // Usamos un formulario oculto o una petición que el servidor GAS pueda procesar para devolver JSON
-                // Nota: Debido a CORS, fetch puede no recibir la respuesta si no está configurado como 'no-cors'
-                // Pero 'no-cors' no nos deja ver el JSON. Usaremos una técnica de fallback.
+            // Construir mensaje de WhatsApp localmente para asegurar velocidad
+            let text = `👋 *¡Hola CleanMayor!* \nQuisiera realizar el siguiente pedido:\n\n`;
+            orderData.productos.forEach(i => {
+                text += `• ${i.product} (x${i.quantity})\n`;
+            });
+            text += `\n📍 *Entrega:* ${orderData.tipoEntrega}${address ? ` (${address})` : ''}`;
+            text += `\n👤 *Cliente:* ${name}`;
 
-                const response = await fetch(SCRIPT_URL, {
+            const waUrl = `https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(text)}`;
+
+            try {
+                // Enviamos los datos al servidor de forma silenciosa para registrar en el Excel y PDF
+                fetch(SCRIPT_URL, {
                     method: 'POST',
+                    mode: 'no-cors',
                     body: JSON.stringify(orderData)
                 });
 
-                const result = await response.json();
+                // Redirigimos INMEDIATAMENTE a WhatsApp para evitar bloqueos
+                window.location.href = waUrl;
 
-                if (result.status === 'success' && result.whatsappPedidoUrl) {
-                    window.open(result.whatsappPedidoUrl, '_blank');
-                } else {
-                    throw new Error("Respuesta no exitosa");
-                }
             } catch (e) {
-                console.log("Error detallado enviando el pedido:", e);
-                // Fallback: Si el servidor falla o hay CORS, abrimos WhatsApp con el texto básico para no perder la venta
-                let text = `👋 *¡Hola CleanMayor!* \nQuisiera realizar el siguiente pedido:\n\n`;
-                orderData.productos.forEach(i => {
-                    text += `• ${i.product} (x${i.quantity})\n`;
-                });
-                text += `\n📍 *Entrega:* ${orderData.tipoEntrega}${address ? ` (${address})` : ''}`;
-                text += `\n👤 *Cliente:* ${name}`;
-                text += `\n\n_(Nota: Hubo un problema al generar la factura PDF, pero te envío el pedido por aquí)_`;
-
-                const waUrl = `https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(text)}`;
-                window.open(waUrl, '_blank');
-            } finally {
-                document.getElementById('loading').style.display = 'none';
-                setTimeout(() => {
-                    location.reload();
-                }, 500);
+                console.log("Error:", e);
+                window.location.href = waUrl;
             }
         }
 
