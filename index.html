@@ -10,13 +10,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #000000;
-            --accent: #000000;
+            --primary: #ffffff;
+            --accent: #ffffff;
             --success: #10b981;
-            --text: #050505;
-            --text-muted: #555555;
-            --white: rgba(255, 255, 255, 0.7);
-            --glass: rgba(255, 255, 255, 0.4);
+            --text: #ffffff;
+            --text-muted: #aaaaaa;
+            --white: rgba(255, 255, 255, 0.1);
+            --glass: rgba(0, 0, 0, 0.3);
+            --glass-border: rgba(255, 255, 255, 0.2);
             --transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
@@ -24,7 +25,7 @@
             font-family: 'Outfit', sans-serif;
             margin: 0;
             padding: 0;
-            background: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.4)), url('bg.jpg') no-repeat center center fixed;
+            background: #000 url('bg.jpg') no-repeat center center fixed;
             background-size: cover;
             color: var(--text);
             line-height: 1.6;
@@ -106,7 +107,8 @@
             max-height: 200px;
             object-fit: contain;
             margin: 0 auto;
-            filter: brightness(1.2) drop-shadow(0 0 15px rgba(255, 255, 255, 0.3));
+            /* Invertir y brillar para que el logo cromado se vea sobre negro */
+            filter: invert(1) brightness(1.5) drop-shadow(0 0 20px rgba(255, 255, 255, 0.4));
             transition: var(--transition);
         }
 
@@ -139,22 +141,22 @@
             width: 100%;
             padding: 16px 24px;
             border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            background: rgba(255, 255, 255, 0.3);
-            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            background: var(--white);
+            backdrop-filter: blur(15px);
             font-size: 1rem;
             outline: none;
             transition: var(--transition);
             text-align: center;
-            color: #000;
+            color: #fff;
         }
 
         .search-box input::placeholder {
-            color: rgba(0, 0, 0, 0.4);
+            color: rgba(255, 255, 255, 0.4);
         }
 
         .search-box input:focus {
-            background: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.2);
             border-color: #fff;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
         }
@@ -187,13 +189,13 @@
             bottom: 0;
             left: 0;
             width: 0;
-            height: 1px;
-            background: #000;
+            height: 2px;
+            background: #fff;
             transition: var(--transition);
         }
 
         .mode-switch button.active {
-            color: #000;
+            color: #fff;
             font-weight: 700;
         }
 
@@ -209,34 +211,35 @@
 
         .product-card {
             background: var(--glass);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
             border-radius: 20px;
             overflow: hidden;
             display: flex;
             flex-direction: column;
             transition: var(--transition);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
         }
 
         .product-card:hover {
-            transform: translateY(-8px) scale(1.01);
-            background: rgba(255, 255, 255, 0.6);
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.4);
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
         }
 
         .product-image {
             width: 100%;
             height: 250px;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
             display: flex;
             align-items: center;
             justify-content: center;
             transition: var(--transition);
             background-size: cover;
             background-position: center;
-            margin-bottom: 5px;
+            border-bottom: 1px solid var(--glass-border);
         }
 
         .product-info {
@@ -314,11 +317,11 @@
             bottom: 3rem;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(30px);
             -webkit-backdrop-filter: blur(30px);
-            color: #000;
-            padding: 18px 36px;
+            color: #fff;
+            padding: 20px 40px;
             border-radius: 50px;
             display: flex;
             align-items: center;
@@ -326,18 +329,18 @@
             cursor: pointer;
             transition: var(--transition);
             z-index: 1000;
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            letter-spacing: 1px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            letter-spacing: 2px;
             text-transform: uppercase;
             font-size: 0.85rem;
             font-weight: 700;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
         }
 
         .cart-bar:hover {
-            background: rgba(255, 255, 255, 0.8);
+            background: #fff;
+            color: #000;
             transform: translateX(-50%) translateY(-5px);
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
         }
 
         .checkout-modal {
