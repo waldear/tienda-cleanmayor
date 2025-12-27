@@ -8,8 +8,30 @@ const CONFIG = {
 };
 // ====================================================================
 
-function doGet() {
+function doGet(e) {
   try {
+    const action = e.parameter.action;
+    
+    // CASO: Obtener Pedidos para el Panel de Control
+    if (action === "pedidos") {
+      const ssPedidos = SpreadsheetApp.openById(CONFIG.PEDIDOS_SS_ID);
+      const sheetPedidos = ssPedidos.getSheets()[0];
+      const values = sheetPedidos.getDataRange().getValues();
+      const headers = values.shift();
+      
+      const pedidos = values.map(row => {
+        let obj = {};
+        headers.forEach((h, i) => {
+          obj[h.toString().toLowerCase().replace(/ /g, "_")] = row[i];
+        });
+        return obj;
+      }).reverse(); // Los más recientes primero
+      
+      return ContentService.createTextOutput(JSON.stringify({status: "success", data: pedidos}))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // CASO POR DEFECTO: Obtener Productos
     const ss = SpreadsheetApp.openById(CONFIG.PRODUCTOS_SS_ID);
     const sheet = ss.getSheets()[0];
     const values = sheet.getDataRange().getValues();
