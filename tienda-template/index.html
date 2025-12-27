@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tienda Premium | Catálogo Digital</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ffffff;
+            --accent: #ffffff;
+            --success: #10b981;
+            --text: #ffffff;
+            --text-muted: #aaaaaa;
+            --white: rgba(255, 255, 255, 0.1);
+            --glass: rgba(0, 0, 0, 0.3);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #000 url('fondo_web.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        @keyframes sweepIn {
+            0% {
+                clip-path: inset(0 100% 0 0);
+                transform: translateX(-20px);
+                opacity: 0;
+            }
+
+            100% {
+                clip-path: inset(0 0 0 0);
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: var(--transition);
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .navbar {
+            background: var(--white);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        }
+
+        .navbar h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: -0.025em;
+        }
+
+        .hero {
+            background: transparent;
+            padding: 4rem 1rem 0;
+            text-align: center;
+            animation: sweepIn 1.2s var(--transition);
+        }
+
+        .hero img {
+            width: 100%;
+            max-width: 450px;
+            height: auto;
+            max-height: 400px;
+            object-fit: contain;
+            margin: 2rem auto;
+            /* PROCESADO PARA MÁXIMA NITIDEZ SOBRE FONDO HD */
+            filter: invert(1) brightness(2) contrast(3);
+            mix-blend-mode: screen;
+            -webkit-mask-image: radial-gradient(circle, black 40%, transparent 80%);
+            mask-image: radial-gradient(circle, black 40%, transparent 80%);
+            transition: var(--transition);
+        }
+
+        .hero p {
+            display: none;
+            /* Simplificar al máximo */
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem 3rem;
+        }
+
+        .shop-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin: 1.5rem 0 2rem;
+            align-items: center;
+        }
+
+        .search-box {
+            width: 100%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 16px 24px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            background: var(--white);
+            backdrop-filter: blur(15px);
+            font-size: 1rem;
+            outline: none;
+            transition: var(--transition);
+            text-align: center;
+            color: #fff;
+        }
+
+        .search-box input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .search-box input:focus {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #fff;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        .mode-switch {
+            background: transparent;
+            padding: 0;
+            display: flex;
+            gap: 1.5rem;
+            width: fit-content;
+        }
+
+        .mode-switch button {
+            padding: 10px 0;
+            border: none;
+            cursor: pointer;
+            font-weight: 400;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: var(--transition);
+            background: transparent;
+            color: var(--text-muted);
+            position: relative;
+        }
+
+        .mode-switch button::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #fff;
+            transition: var(--transition);
+        }
+
+        .mode-switch button.active {
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .mode-switch button.active::after {
+            width: 100%;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 2rem;
+        }
+
+        .product-card {
+            background: var(--glass);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-radius: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 250px;
+            background: rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            background-size: cover;
+            background-position: center;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .product-info {
+            padding: 1.5rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-info h3 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .product-info p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 1.25rem;
+            flex-grow: 1;
+        }
+
+        .product-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+        }
+
+        .product-price {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .qty-picker {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 6px;
+            border-radius: 14px;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+        }
+
+        .qty-picker button {
+            width: 30px;
+            height: 30px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            transition: var(--transition);
+        }
+
+        .qty-picker button:hover {
+            background: #fff;
+            color: #000;
+        }
+
+        .qty-picker span {
+            min-width: 20px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1rem;
+            color: #fff;
+        }
+
+        .cart-bar {
+            position: fixed;
+            bottom: 3rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            color: #fff;
+            padding: 20px 40px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            cursor: pointer;
+            transition: var(--transition);
+            z-index: 1000;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            font-weight: 700;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .cart-bar:hover {
+            background: #fff;
+            color: #000;
+            transform: translateX(-50%) translateY(-5px);
+        }
+
+        .checkout-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .checkout-modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: transparent;
+            width: 100%;
+            max-width: 450px;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .form-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            text-align: center;
+        }
+
+        .field {
+            margin-bottom: 1.25rem;
+        }
+
+        .field label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text);
+        }
+
+        .field input,
+        .field select,
+        .field textarea {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .field input:focus,
+        .field select:focus,
+        .field textarea:focus {
+            border-color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .checkout-btn {
+            width: 100%;
+            padding: 18px;
+            background: #000;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 2rem;
+        }
+
+        .checkout-btn:hover {
+            background: #333;
+            transform: translateY(-3px);
+        }
+
+        .cancel-btn {
+            width: 100%;
+            padding: 12px;
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            font-size: 0.8rem;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: var(--transition);
+        }
+
+        .cancel-btn:hover {
+            color: #000;
+        }
+
+        .loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: 3000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .spin {
+            width: 48px;
+            height: 48px;
+            border: 5px solid #e2e8f0;
+            border-top: 5px solid var(--accent);
+            border-radius: 50%;
+            animation: rotate 1s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 640px) {
+            .hero h2 {
+                font-size: 2rem;
+            }
+
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="loading" class="loader-overlay">
+        <div class="spin"></div>
+        <p style="margin-top: 1rem; font-weight: 600;">Procesando...</p>
+    </div>
+
+    <!-- Navbar eliminado por requerimiento de minimalismo extremo -->
+
+    <header class="hero">
+        <div class="hero">
+            <img src="logo_negocio.png" alt="Logo de la tienda" onclick="logoClick()">
+            <p
+                style="font-size: 1.1rem; max-width: 700px; margin: 0 auto; opacity: 0.5; letter-spacing: 2px; font-weight: 300;">
+                PRODUCTOS SELECCIONADOS · ENVÍO A DOMICILIO · WHATSAPP</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="shop-controls">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Buscar productos..." oninput="drawGrid()">
+            </div>
+            <div class="mode-switch">
+                <button id="btnMinorista" class="active" onclick="changePricelist('minorista')">Minorista</button>
+                <button id="btnMayorista" onclick="changePricelist('mayorista')">Mayorista</button>
+            </div>
+        </div>
+
+        <div id="grid" class="product-grid">
+            <p style="text-align: center; grid-column: 1/-1;">Cargando catálogo...</p>
+        </div>
+    </main>
+
+    <footer style="text-align: center; padding: 4rem 1rem; opacity: 0.2; font-size: 0.8rem; letter-spacing: 1px;">
+        <p>© 2026 TU TIENDA ONLINE</p>
+    </footer>
+
+    <!-- Secret Admin Login Modal -->
+    <div id="adminModal" class="checkout-modal">
+        <div class="modal-content" style="max-width: 320px; text-align: center;">
+            <div style="margin-bottom: 1.5rem; opacity: 0.5;">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+            </div>
+            <h3 class="form-title" style="margin-bottom: 0.5rem;">Acceso Restringido</h3>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1.5rem;">Ingresa el PIN de seguridad
+            </p>
+
+            <input type="password" id="adminPin" maxlength="4" placeholder="••••"
+                style="text-align:center; font-size: 2rem; letter-spacing: 10px; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 15px; color: #fff; width: 100%; box-sizing: border-box; margin-bottom: 1.5rem;">
+
+            <button class="checkout-btn" onclick="checkPin()">INGRESAR</button>
+            <button class="cancel-btn" onclick="toggleAdminModal(false)">CERRAR</button>
+        </div>
+    </div>
+
+    <button id="cartBar" class="cart-bar hidden" onclick="toggleCheckout(true)">
+        <span style="font-weight: 800; font-size: 1.1rem;">Ver Pedido</span>
+        <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.2);"></div>
+        <span id="cartSum" style="font-weight: 600;">$0</span>
+    </button>
+
+    <div id="modal" class="checkout-modal">
+        <div class="modal-content">
+            <h3 class="form-title">🛒 Detalle del Pedido</h3>
+
+            <div class="field">
+                <label>Nombre y Apellido</label>
+                <input type="text" id="f-name" placeholder="Ej: Juan Pérez">
+            </div>
+
+            <div class="field">
+                <label>WhatsApp de Contacto</label>
+                <input type="tel" id="f-phone" placeholder="Ej: 3525123456">
+            </div>
+
+            <div class="field">
+                <label>Método de Entrega</label>
+                <select id="f-delivery" onchange="checkAddress()">
+                    <option value="retiro">Retiro en Local</option>
+                    <option value="domicilio">Envío a Domicilio</option>
+                </select>
+            </div>
+
+            <div id="field-address" class="field hidden">
+                <label>Dirección de Entrega</label>
+                <input type="text" id="f-address" placeholder="Calle, número y barrio">
+            </div>
+
+            <div class="field">
+                <label>Anotaciones (opcional)</label>
+                <textarea id="f-notes" rows="2" placeholder="Algo que debamos saber..."></textarea>
+            </div>
+
+            <button class="checkout-btn" onclick="sendOrder()">CONFIRMAR PEDIDO</button>
+            <button class="cancel-btn" onclick="toggleCheckout(false)">Cerrar</button>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwyY2Ub2tDU1zbHcdbB-MZHCQyQnxH_CltyXIz0wSTELdDDo99baZ3IiNTQ8nLe-FyE/exec";
+        const WHATSAPP_NUM = "5493525550761";
+
+        let products = [];
+        let items = {};
+        let pricelist = 'minorista';
+
+        async function loadShop() {
+            try {
+                const r = await fetch(SCRIPT_URL);
+                const d = await r.json();
+                if (d.status === 'success') {
+                    products = d.data;
+                    drawGrid();
+                }
+            } catch (err) {
+                document.getElementById('grid').innerHTML = '<p>No se pudo cargar el catálogo. Intenta de nuevo más tarde.</p>';
+            }
+        }
+
+        function drawGrid() {
+            const grid = document.getElementById('grid');
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            grid.innerHTML = '';
+
+            const filtered = products.filter(p => p.name.toLowerCase().includes(query));
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '<p style="text-align:center; grid-column:1/-1;">No encontramos productos con ese nombre.</p>';
+                return;
+            }
+
+            filtered.forEach((p, index) => {
+                const price = pricelist === 'minorista' ? p.priceMinorista : p.priceMayorista;
+                const card = document.createElement('div');
+                card.className = 'product-card reveal';
+                card.style.transitionDelay = `${index * 0.05}s`;
+
+                const initial = p.name.charAt(0).toUpperCase();
+
+                card.innerHTML = `
+                    <div class="product-image" style="${p.image ? `background-image: url('${p.image}')` : ''}">${p.image ? '' : initial}</div>
+                    <div class="product-info">
+                        <h3>${p.name}</h3>
+                        <p>${p.description || 'Calidad garantizada.'}</p>
+                        <div class="product-footer">
+                            <span class="product-price">$${Number(price).toLocaleString('es-AR')}</span>
+                            <div class="qty-picker">
+                                <button onclick="modQty('${p.name}', -1)">-</button>
+                                <span>${items[p.name] || 0}</span>
+                                <button onclick="modQty('${p.name}', 1)">+</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+                observer.observe(card);
+            });
+        }
+
+        function modQty(name, delta) {
+            items[name] = Math.max(0, (items[name] || 0) + delta);
+            if (items[name] === 0) delete items[name];
+            drawGrid();
+            refreshCart();
+        }
+
+        function refreshCart() {
+            let total = 0;
+            let count = 0;
+            Object.keys(items).forEach(n => {
+                const p = products.find(prod => prod.name === n);
+                total += items[n] * (pricelist === 'minorista' ? p.priceMinorista : p.priceMayorista);
+                count += items[n];
+            });
+            document.getElementById('cartSum').textContent = `$${total.toLocaleString('es-AR')}`;
+            document.getElementById('cartBar').classList.toggle('hidden', count === 0);
+        }
+
+        function changePricelist(mode) {
+            pricelist = mode;
+            document.getElementById('btnMinorista').classList.toggle('active', mode === 'minorista');
+            document.getElementById('btnMayorista').classList.toggle('active', mode === 'mayorista');
+            drawGrid();
+            refreshCart();
+        }
+
+        function toggleCheckout(show) {
+            document.getElementById('modal').style.display = show ? 'flex' : 'none';
+        }
+
+        function checkAddress() {
+            const isHome = document.getElementById('f-delivery').value === 'domicilio';
+            document.getElementById('field-address').classList.toggle('hidden', !isHome);
+        }
+
+        async function sendOrder() {
+            const name = document.getElementById('f-name').value;
+            const phone = document.getElementById('f-phone').value;
+            const delivery = document.getElementById('f-delivery').value;
+            const address = document.getElementById('f-address').value;
+
+            if (!name || !phone) return alert("Por favor ingresa tu nombre y teléfono de contacto.");
+            if (delivery === 'domicilio' && !address) return alert("Por favor ingresa la dirección de entrega.");
+
+            document.getElementById('loading').style.display = 'flex';
+
+            const orderData = {
+                numeroPedido: "ORD-" + Math.floor(Date.now() / 1000),
+                clienteNombre: name,
+                clienteTelefono: phone,
+                productos: Object.keys(items).map(n => ({ product: n, quantity: items[n] })),
+                modo: pricelist.toUpperCase(),
+                totalItems: Object.values(items).reduce((a, b) => a + b, 0),
+                tipoEntrega: delivery === 'retiro' ? 'Retiro' : 'Domicilio',
+                direccion: address,
+                notas: document.getElementById('f-notes').value,
+                invoiceMethod: 'WhatsApp'
+            };
+
+            // Construir mensaje de WhatsApp localmente
+            let text = `👋 *¡Hola! Quisiera realizar el siguiente pedido:* \n\n`;
+            orderData.productos.forEach(i => {
+                text += `• ${i.product} (x${i.quantity})\n`;
+            });
+            text += `\n📍 *Entrega:* ${orderData.tipoEntrega}${address ? ` (${address})` : ''}`;
+            text += `\n👤 *Cliente:* ${name}`;
+
+            const waUrl = `https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(text)}`;
+
+            try {
+                fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify(orderData)
+                });
+                window.location.href = waUrl;
+            } catch (e) {
+                console.log("Error:", e);
+                window.location.href = waUrl;
+            }
+        }
+
+        // Reveal Animation Logic
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, observerOptions);
+
+        // Admin Login Logic
+        let clickCount = 0;
+        let lastClickTime = 0;
+
+        function logoClick() {
+            const now = Date.now();
+            // Ventana de 1.5 segundos para el triple clic
+            if (now - lastClickTime > 1500) clickCount = 0;
+            clickCount++;
+            lastClickTime = now;
+
+            if (clickCount === 3) {
+                clickCount = 0;
+                toggleAdminModal(true);
+            }
+        }
+
+        function toggleAdminModal(show) {
+            const m = document.getElementById('adminModal');
+            m.classList.toggle('active', show);
+            if (show) document.getElementById('adminPin').focus();
+            else document.getElementById('adminPin').value = '';
+        }
+
+        function checkPin() {
+            const pin = document.getElementById('adminPin').value;
+            if (pin === '1234') {
+                window.location.href = 'admin.html';
+            } else {
+                alert('PIN Incorrecto');
+                document.getElementById('adminPin').value = '';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadShop);
+    </script>
+</body>
+
+</html>
