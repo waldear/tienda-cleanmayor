@@ -94,49 +94,40 @@
         .hero {
             background: #ffffff;
             color: var(--primary);
-            padding: 3rem 1rem 1rem;
+            padding: 2rem 1rem 0;
             text-align: center;
             animation: sweepIn 1.2s var(--transition);
+            min-height: auto;
         }
 
         .hero img {
-            width: 95%;
-            max-width: 700px;
-            margin: 0 auto 1.5rem;
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+            max-height: 250px;
+            object-fit: contain;
+            margin: 0 auto;
             filter: contrast(1.1) brightness(1.1);
             mix-blend-mode: darken;
             transition: var(--transition);
         }
 
-        .hero img:hover {
-            transform: scale(1.02);
-        }
-
-        .hero h2 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            margin-bottom: 1rem;
-            letter-spacing: -0.05em;
-        }
-
         .hero p {
-            font-size: 1.125rem;
-            opacity: 0.9;
-            max-width: 600px;
-            margin: 0 auto;
+            display: none;
+            /* Simplificar al máximo */
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 1.5rem 5rem;
+            padding: 0 1.5rem 3rem;
         }
 
         .shop-controls {
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
-            margin-bottom: 3rem;
+            gap: 1rem;
+            margin: 1.5rem 0 2rem;
             align-items: center;
         }
 
@@ -602,10 +593,11 @@
                 return;
             }
 
-            filtered.forEach(p => {
+            filtered.forEach((p, index) => {
                 const price = pricelist === 'minorista' ? p.priceMinorista : p.priceMayorista;
                 const card = document.createElement('div');
-                card.className = 'product-card';
+                card.className = 'product-card reveal';
+                card.style.transitionDelay = `${index * 0.05}s`;
 
                 const initial = p.name.charAt(0).toUpperCase();
 
@@ -613,7 +605,7 @@
                     <div class="product-image" style="${p.image ? `background-image: url('${p.image}')` : ''}">${p.image ? '' : initial}</div>
                     <div class="product-info">
                         <h3>${p.name}</h3>
-                        <p>${p.description || 'Calidad garantizada CleanMayor.'}</p>
+                        <p>${p.description || 'Calidad garantizada Clean Store.'}</p>
                         <div class="product-footer">
                             <span class="product-price">$${Number(price).toLocaleString('es-AR')}</span>
                             <div class="qty-picker">
@@ -625,6 +617,7 @@
                     </div>
                 `;
                 grid.appendChild(card);
+                observer.observe(card);
             });
         }
 
@@ -713,7 +706,8 @@
 
         // Reveal Animation Logic
         const observerOptions = {
-            threshold: 0.1
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
         };
 
         const observer = new IntersectionObserver((entries) => {
@@ -724,17 +718,7 @@
             });
         }, observerOptions);
 
-        function initAnimations() {
-            document.querySelectorAll('.product-card').forEach(card => {
-                card.classList.add('reveal');
-                observer.observe(card);
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            loadShop();
-            setTimeout(initAnimations, 1000); // Wait for products to load
-        });
+        document.addEventListener('DOMContentLoaded', loadShop);
     </script>
 </body>
 
