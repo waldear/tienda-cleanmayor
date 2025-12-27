@@ -107,11 +107,11 @@
             max-height: 400px;
             object-fit: contain;
             margin: 0 auto;
-            /* Invertimos para que lo negro sea blanco/brillante y el fondo blanco sea negro (invisible con screen) */
-            filter: invert(1) brightness(1.5) contrast(1.1);
-            mix-blend-mode: screen;
-            -webkit-mask-image: radial-gradient(circle, black 60%, transparent 95%);
-            mask-image: radial-gradient(circle, black 60%, transparent 95%);
+            /* INTEGRACIÓN DEFINITIVA: Limpieza total del cuadro blanco */
+            filter: invert(1) brightness(2) contrast(4);
+            mix-blend-mode: lighten;
+            -webkit-mask-image: radial-gradient(circle, black 30%, transparent 70%);
+            mask-image: radial-gradient(circle, black 30%, transparent 70%);
             transition: var(--transition);
         }
 
