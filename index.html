@@ -102,16 +102,16 @@
 
         .hero img {
             width: 100%;
-            max-width: 500px;
+            max-width: 450px;
             height: auto;
             max-height: 400px;
             object-fit: contain;
-            margin: 0 auto;
-            /* INTEGRACIÓN DEFINITIVA: Limpieza total del cuadro blanco */
-            filter: invert(1) brightness(2) contrast(4);
-            mix-blend-mode: lighten;
-            -webkit-mask-image: radial-gradient(circle, black 30%, transparent 70%);
-            mask-image: radial-gradient(circle, black 30%, transparent 70%);
+            margin: 2rem auto;
+            /* PROCESADO PARA MÁXIMA NITIDEZ SOBRE FONDO HD */
+            filter: invert(1) brightness(2) contrast(3);
+            mix-blend-mode: screen;
+            -webkit-mask-image: radial-gradient(circle, black 40%, transparent 80%);
+            mask-image: radial-gradient(circle, black 40%, transparent 80%);
             transition: var(--transition);
         }
 
