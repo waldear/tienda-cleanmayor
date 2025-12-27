@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiosco Inteligente | Pedidos por WhatsApp</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #f59e0b;
+            /* Ambar/Naranja vibrante */
+            --secondary: #ef4444;
+            /* Rojo Dulce */
+            --accent: #8b5cf6;
+            /* Violeta para destacar promos */
+            --bg: #fffcf2;
+            /* Fondo crema suave */
+            --text: #1f2937;
+            --white: #ffffff;
+            --radius: 16px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+        }
+
+        .navbar {
+            background: var(--primary);
+            padding: 1rem;
+            text-align: center;
+            color: white;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 3rem 1.5rem;
+            text-align: center;
+            border-radius: 0 0 40px 40px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1rem 6rem;
+        }
+
+        .search-container {
+            margin-top: -30px;
+            margin-bottom: 2rem;
+        }
+
+        .search-container input {
+            width: 100%;
+            padding: 1.2rem;
+            border-radius: 99px;
+            border: none;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            font-size: 1.1rem;
+            outline: none;
+        }
+
+        .category-tabs {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding: 0.5rem 0;
+            margin-bottom: 1.5rem;
+        }
+
+        .tab {
+            padding: 0.6rem 1.2rem;
+            background: white;
+            border-radius: 99px;
+            border: 1px solid #eee;
+            white-space: nowrap;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .tab.active {
+            background: var(--secondary);
+            color: white;
+            border-color: var(--secondary);
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 1rem;
+        }
+
+        .kiosk-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 1rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s;
+        }
+
+        .kiosk-card:hover {
+            transform: scale(1.03);
+        }
+
+        .image-placeholder {
+            width: 100%;
+            height: 120px;
+            background: #fdf2f2;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin-bottom: 0.8rem;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .kiosk-card h3 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            height: 2.4rem;
+            overflow: hidden;
+        }
+
+        .kiosk-card .price {
+            font-weight: 800;
+            color: var(--secondary);
+            font-size: 1.2rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .qty-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: #f9fafb;
+            padding: 6px;
+            border-radius: 12px;
+        }
+
+        .qty-control button {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            border: none;
+            background: white;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .cart-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 99px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            width: fit-content;
+            min-width: 280px;
+            justify-content: space-between;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background: white;
+            width: 100%;
+            max-width: 450px;
+            border-radius: 24px;
+            padding: 2rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 12px;
+            border: 1px solid #ddd;
+            font-family: inherit;
+        }
+
+        .btn-confirm {
+            width: 100%;
+            padding: 1rem;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+
+        @media (max-width: 480px) {
+            .product-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="navbar">
+        <h1>🍬 Kiosco Express</h1>
+    </div>
+    <header class="hero">
+        <h2>Tus golosinas favoritas</h2>
+        <p>Armá tu pedido y pasá a buscarlo en 5 minutos.</p>
+    </header>
+
+    <div class="container">
+        <div class="search-container">
+            <input type="text" id="search" placeholder="🔍 ¿Qué buscas hoy?" oninput="render()">
+        </div>
+
+        <div class="category-tabs" id="categories">
+            <div class="tab active" onclick="setCategory('Todos')">Todos</div>
+            <div class="tab" onclick="setCategory('Golosinas')">Golosinas</div>
+            <div class="tab" onclick="setCategory('Bebidas')">Bebidas</div>
+            <div class="tab" onclick="setCategory('Cigarrillos')">Cigarrillos</div>
+            <div class="tab" onclick="setCategory('Snacks')">Snacks</div>
+        </div>
+
+        <div id="grid" class="product-grid"></div>
+    </div>
+
+    <div id="cartBar" class="cart-bar" style="display: none;" onclick="showModal()">
+        <span>🛒 <b id="cartCount">0</b> ítems</span>
+        <span id="cartSum" style="font-weight: 800;">$0</span>
+        <span>PEDIR 👉</span>
+    </div>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 1.5rem; text-align: center;">🛍️ Tu Pedido</h2>
+            <div class="input-group">
+                <label>Nombre</label>
+                <input type="text" id="f-name" placeholder="Tu nombre">
+            </div>
+            <div class="input-group">
+                <label>Entrega</label>
+                <select id="f-mode">
+                    <option value="retiro">Paso a retirar (Take Away)</option>
+                    <option value="domicilio">Delivery a domicilio</option>
+                </select>
+            </div>
+            <button class="btn-confirm" onclick="sendOrder()">ENVIAR POR WHATSAPP</button>
+            <button style="width: 100%; background: none; border: none; margin-top: 10px; color: #666; cursor: pointer;"
+                onclick="hideModal()">Cancelar</button>
+        </div>
+    </div>
+
+    <script>
+        // REEMPLAZAR CON TU URL DE APPS SCRIPT
+        const SCRIPT_URL = "TEMPLATE_SCRIPT_URL";
+        const WHATSAPP_NUM = "TU_NUMERO_AQUI";
+
+        let products = [];
+        let cart = {};
+        let currentCat = 'Todos';
+
+        async function init() {
+            try {
+                const r = await fetch(SCRIPT_URL);
+                const d = await r.json();
+                products = d.data;
+                render();
+            } catch (e) { console.log(e); }
+        }
+
+        function setCategory(cat) {
+            currentCat = cat;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.innerText === cat));
+            render();
+        }
+
+        function render() {
+            const grid = document.getElementById('grid');
+            const q = document.getElementById('search').value.toLowerCase();
+            grid.innerHTML = '';
+
+            const filtered = products.filter(p => {
+                const matchName = p.name.toLowerCase().includes(q);
+                const matchCat = currentCat === 'Todos' || (p.category && p.category === currentCat);
+                return matchName && matchCat;
+            });
+
+            filtered.forEach(p => {
+                const div = document.createElement('div');
+                div.className = 'kiosk-card';
+                div.innerHTML = `
+                    <div class="image-placeholder" style="${p.image ? `background-image:url('${p.image}')` : ''}">${p.image ? '' : '🍬'}</div>
+                    <h3>${p.name}</h3>
+                    <p class="price">$${p.priceMinorista || p.price}</p>
+                    <div class="qty-control">
+                        <button onclick="change('${p.name}', -1)">-</button>
+                        <span id="qty-${p.name}">${cart[p.name] || 0}</span>
+                        <button onclick="change('${p.name}', 1)">+</button>
+                    </div>
+                `;
+                grid.appendChild(div);
+            });
+        }
+
+        function change(name, delta) {
+            cart[name] = Math.max(0, (cart[name] || 0) + delta);
+            if (cart[name] === 0) delete cart[name];
+            document.getElementById(`qty-${name}`).innerText = cart[name] || 0;
+            updateCartBar();
+        }
+
+        function updateCartBar() {
+            const bar = document.getElementById('cartBar');
+            const count = Object.values(cart).reduce((a, b) => a + b, 0);
+            let sum = 0;
+            Object.keys(cart).forEach(n => {
+                const p = products.find(prod => prod.name === n);
+                sum += cart[n] * (p.priceMinorista || p.price);
+            });
+
+            document.getElementById('cartCount').innerText = count;
+            document.getElementById('cartSum').innerText = `$${sum}`;
+            bar.style.display = count > 0 ? 'flex' : 'none';
+        }
+
+        function showModal() { document.getElementById('modal').style.display = 'flex'; }
+        function hideModal() { document.getElementById('modal').style.display = 'none'; }
+
+        function sendOrder() {
+            const name = document.getElementById('f-name').value;
+            const mode = document.getElementById('f-mode').value;
+            if (!name) return alert("Poné tu nombre!");
+
+            let msg = `🍭 *PEDIDO KIOSCO EXPRESS* 🍭\n\n`;
+            msg += `👤 *Cliente:* ${name}\n`;
+            msg += `🛵 *Entrega:* ${mode === 'retiro' ? 'Paso a retirar' : 'Envio a domicilio'}\n\n`;
+            msg += `*Productos:*\n`;
+
+            Object.keys(cart).forEach(n => {
+                msg += `• ${n} (x${cart[n]})\n`;
+            });
+
+            const url = `https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(msg)}`;
+
+            // Registro silencioso en Excel
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify({
+                    clienteNombre: name,
+                    tipoEntrega: mode,
+                    productos: Object.keys(cart).map(n => ({ product: n, quantity: cart[n] })),
+                    totalItems: Object.values(cart).reduce((a, b) => a + b, 0)
+                })
+            });
+
+            window.location.href = url;
+        }
+
+        init();
+    </script>
+</body>
+
+</html>
