@@ -355,13 +355,18 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             z-index: 2000;
             display: none;
             align-items: center;
             justify-content: center;
             padding: 1rem;
+        }
+
+        .checkout-modal.active {
+            display: flex;
         }
 
         .modal-content {
@@ -396,18 +401,22 @@
         .field select,
         .field textarea {
             width: 100%;
-            padding: 12px;
-            border-radius: 10px;
-            border: 1px solid #e2e8f0;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
             font-family: inherit;
             font-size: 1rem;
             outline: none;
-            transition: all 0.2s;
+            transition: all 0.3s;
         }
 
-        .field input:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        .field input:focus,
+        .field select:focus,
+        .field textarea:focus {
+            border-color: #fff;
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .checkout-btn {
@@ -767,7 +776,8 @@
 
         function logoClick() {
             const now = Date.now();
-            if (now - lastClickTime > 1000) clickCount = 0; // Reset si pasa más de 1s
+            // Ventana de 1.5 segundos para el triple clic
+            if (now - lastClickTime > 1500) clickCount = 0;
             clickCount++;
             lastClickTime = now;
 

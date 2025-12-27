@@ -272,10 +272,10 @@
             const totalItems = data.reduce((acc, curr) => acc + (parseInt(curr.total_items) || 0), 0);
             document.getElementById('totalItems').innerText = totalItems;
 
-            const today = new Date().toLocaleDateString();
+            const todayStr = new Date().toDateString();
             const salesToday = data.filter(order => {
-                const orderDate = new Date(order.timestamp).toLocaleDateString();
-                return orderDate === today;
+                const orderDate = new Date(order.timestamp);
+                return !isNaN(orderDate) && orderDate.toDateString() === todayStr;
             }).length;
             document.getElementById('salesToday').innerText = salesToday;
         }
@@ -286,12 +286,13 @@
 
             data.forEach(order => {
                 const row = document.createElement('tr');
-                const date = new Date(order.timestamp).toLocaleString('es-AR', {
+                const orderDate = new Date(order.timestamp);
+                const dateDisplay = isNaN(orderDate) ? 'Fecha pendiente' : orderDate.toLocaleString('es-AR', {
                     day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
                 });
 
                 row.innerHTML = `
-                    <td><span style="opacity: 0.6; font-size: 0.8rem">${date}</span></td>
+                    <td><span style="opacity: 0.6; font-size: 0.8rem">${dateDisplay}</span></td>
                     <td><strong style="font-family: monospace;">${order.numeropedido || '-'}</strong></td>
                     <td>
                         <div style="font-weight: 600">${order.clientenombre || 'Sin nombre'}</div>
