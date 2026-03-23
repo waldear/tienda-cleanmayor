@@ -16,7 +16,7 @@
             --accent-grad: linear-gradient(135deg, #00d4ff, #a855f7);
             --success: #10b981;
             --text: #ffffff;
-            --text-muted: #aaaaaa;
+            --text-muted: #cccccc;
             --white: rgba(255, 255, 255, 0.06);
             --glass: rgba(255, 255, 255, 0.05);
             --glass-border: rgba(255, 255, 255, 0.15);
@@ -167,7 +167,7 @@
 
         .hero {
             background: transparent;
-            padding: 4rem 1rem 0;
+            padding: 1.5rem 1rem 0;
             text-align: center;
             animation: sweepIn 1.2s var(--transition);
         }
@@ -176,9 +176,9 @@
             width: 100%;
             max-width: 450px;
             height: auto;
-            max-height: 400px;
+            max-height: 280px;
             object-fit: contain;
-            margin: 2rem auto;
+            margin: 0.5rem auto;
             /* PROCESADO PARA MÁXIMA NITIDEZ SOBRE FONDO HD */
             filter: invert(1) brightness(2) contrast(3);
             mix-blend-mode: screen;
@@ -202,7 +202,7 @@
             display: flex;
             flex-direction: column;
             gap: 1rem;
-            margin: 1.5rem 0 2rem;
+            margin: 0.5rem 0 1.5rem;
             align-items: center;
         }
 
@@ -229,7 +229,7 @@
         }
 
         .search-box input::placeholder {
-            color: rgba(255, 255, 255, 0.4);
+            color: rgba(255, 255, 255, 0.65);
         }
 
         .search-box input:focus {
@@ -882,7 +882,7 @@
 
     <header class="hero" style="position: relative; z-index: 1;">
         <div class="hero">
-            <img src="logo.png" alt="Clean Store" onclick="logoClick()">
+            <img src="logo.png" alt="Clean Store">
             <p
                 style="font-size: 0.85rem; max-width: 700px; margin: 0 auto; letter-spacing: 3px; font-weight: 300; background: linear-gradient(135deg, rgba(255,255,255,0.35), rgba(0,212,255,0.5)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
                 PRODUCTOS DE ALTA CALIDAD · ENVÍO A DOMICILIO · WHATSAPP</p>
@@ -935,25 +935,6 @@
         <p>© 2026 CLEAN STORE</p>
     </footer>
 
-    <!-- Secret Admin Login Modal -->
-    <div id="adminModal" class="checkout-modal">
-        <div class="modal-content" style="max-width: 320px; text-align: center;">
-            <div style="margin-bottom: 1.5rem; opacity: 0.5;">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                </svg>
-            </div>
-            <h3 class="form-title" style="margin-bottom: 0.5rem;">Acceso Restringido</h3>
-            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1.5rem;">Ingresa el PIN de seguridad
-            </p>
-
-            <input type="password" id="adminPin" maxlength="10" placeholder="••••••"
-                style="text-align:center; font-size: 2rem; letter-spacing: 10px; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 15px; color: #fff; width: 100%; box-sizing: border-box; margin-bottom: 1.5rem;">
-
-            <button class="checkout-btn" onclick="checkPin()">INGRESAR</button>
-            <button class="cancel-btn" onclick="toggleAdminModal(false)">CERRAR</button>
-        </div>
-    </div>
 
     <button id="cartBar" class="cart-bar hidden" onclick="toggleCheckout(true)">
         <span style="font-weight: 800; font-size: 1.1rem;">Ver Pedido</span>
@@ -1231,51 +1212,6 @@
             });
         }, observerOptions);
 
-        // Admin Login Logic
-        let clickCount = 0;
-        let lastClickTime = 0;
-
-        function logoClick() {
-            const now = Date.now();
-            // Ventana de 1.5 segundos para el triple clic
-            if (now - lastClickTime > 1500) clickCount = 0;
-            clickCount++;
-            lastClickTime = now;
-
-            if (clickCount === 3) {
-                clickCount = 0;
-                toggleAdminModal(true);
-            }
-        }
-
-        function toggleAdminModal(show) {
-            const m = document.getElementById('adminModal');
-            m.classList.toggle('active', show);
-            if (show) document.getElementById('adminPin').focus();
-            else document.getElementById('adminPin').value = '';
-        }
-
-        async function checkPin() {
-            const pin = document.getElementById('adminPin').value;
-            const btn = document.querySelector('#adminModal .checkout-btn');
-            btn.textContent = 'Verificando...';
-            btn.disabled = true;
-            try {
-                const res = await fetch(`${SCRIPT_URL}?action=verificarPin&pin=${encodeURIComponent(pin)}`);
-                const data = await res.json();
-                if (data.valid) {
-                    window.location.href = 'admin.html';
-                } else {
-                    alert('PIN Incorrecto');
-                    document.getElementById('adminPin').value = '';
-                }
-            } catch(err) {
-                alert('Error de conexión. Intentá de nuevo.');
-            } finally {
-                btn.textContent = 'INGRESAR';
-                btn.disabled = false;
-            }
-        }
 
         document.addEventListener('DOMContentLoaded', loadShop);
     </script>
