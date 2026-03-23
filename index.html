@@ -1025,6 +1025,9 @@
                 if (d.status === 'success') {
                     products = d.data;
                     drawGrid();
+                } else {
+                    document.getElementById('grid').innerHTML =
+                        '<p style="text-align:center; grid-column:1/-1;">No se pudo cargar el catálogo. Recargá la página.</p>';
                 }
             } catch (err) {
                 document.getElementById('grid').innerHTML = '<p>No se pudo cargar el catálogo. Intenta de nuevo más tarde.</p>';
@@ -1039,7 +1042,11 @@
             const filtered = products.filter(p => p.name.toLowerCase().includes(query));
 
             if (filtered.length === 0) {
-                grid.innerHTML = '<p style="text-align:center; grid-column:1/-1;">No encontramos productos con ese nombre.</p>';
+                if (products.length === 0 && query === '') {
+                    grid.innerHTML = '<p style="text-align:center; grid-column:1/-1; opacity:0.5;">Cargando catálogo...</p>';
+                } else {
+                    grid.innerHTML = '<p style="text-align:center; grid-column:1/-1;">No encontramos productos con ese nombre.</p>';
+                }
                 return;
             }
 
