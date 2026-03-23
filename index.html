@@ -772,6 +772,15 @@
         let pricelist = 'minorista';
 
         async function loadShop() {
+            // Leer parámetro ?modo= de la URL para QR dinámicos
+            const params = new URLSearchParams(window.location.search);
+            const modoParam = params.get('modo');
+            if (modoParam === 'mayorista') {
+                pricelist = 'mayorista';
+                document.getElementById('btnMinorista').classList.remove('active');
+                document.getElementById('btnMayorista').classList.add('active');
+            }
+
             try {
                 const r = await fetch(SCRIPT_URL);
                 const d = await r.json();

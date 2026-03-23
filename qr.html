@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Códigos QR | Clean Store</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <style>
+        :root {
+            --accent: #00d4ff;
+            --accent-2: #a855f7;
+            --accent-grad: linear-gradient(135deg, #00d4ff, #a855f7);
+            --text: #ffffff;
+            --text-muted: #8899aa;
+            --glass: rgba(5, 5, 20, 0.5);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #000 url('bg.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* Aurora */
+        .aurora { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden; }
+        .aurora-orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.16; }
+        .orb-1 { width: 600px; height: 600px; background: radial-gradient(circle, #7b2ff7, transparent 70%); top: -200px; left: -100px; animation: driftA 18s ease-in-out infinite alternate; }
+        .orb-2 { width: 500px; height: 500px; background: radial-gradient(circle, #00d4ff, transparent 70%); bottom: -100px; right: -80px; animation: driftB 22s ease-in-out infinite alternate; }
+        .orb-3 { width: 300px; height: 300px; background: radial-gradient(circle, #ff6b9d, transparent 70%); top: 40%; left: 45%; opacity: 0.08; animation: driftC 28s ease-in-out infinite alternate; }
+        @keyframes driftA { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(70px,50px) scale(1.1); } }
+        @keyframes driftB { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(-50px,-40px) scale(1.1); } }
+        @keyframes driftC { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(-60px,60px) scale(0.9); } }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2.5rem 2rem 4rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .page-header {
+            text-align: center;
+            padding: 2rem 0 2.5rem;
+            animation: fadeDown 0.7s ease;
+        }
+
+        @keyframes fadeDown { from { opacity: 0; transform: translateY(-15px); } to { opacity: 1; transform: translateY(0); } }
+
+        .page-header h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: var(--accent-grad);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.4rem;
+        }
+
+        .page-header p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+
+        /* URL Config */
+        .url-config {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 2.5rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            animation: fadeUp 0.6s ease 0.1s both;
+        }
+
+        .url-config label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .url-config input {
+            flex: 1;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 10px 14px;
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .url-config input:focus {
+            border-color: rgba(0,212,255,0.5);
+            box-shadow: 0 0 20px rgba(0,212,255,0.1);
+        }
+
+        .btn-generate {
+            background: var(--accent-grad);
+            color: #fff;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: var(--transition);
+            box-shadow: 0 5px 20px rgba(0,212,255,0.2);
+        }
+
+        .btn-generate:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,212,255,0.35); }
+
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* QR Grid */
+        .qr-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .qr-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2rem 1.5rem 1.5rem;
+            text-align: center;
+            transition: var(--transition);
+            animation: fadeUp 0.6s ease both;
+        }
+
+        .qr-card:nth-child(1) { animation-delay: 0.2s; }
+        .qr-card:nth-child(2) { animation-delay: 0.3s; }
+        .qr-card:nth-child(3) { animation-delay: 0.4s; }
+
+        .qr-card:hover {
+            border-color: rgba(0,212,255,0.3);
+            box-shadow: 0 0 40px rgba(0,212,255,0.08);
+            transform: translateY(-6px);
+        }
+
+        .qr-badge {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1.5rem;
+        }
+
+        .badge-general { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); }
+        .badge-minorista { background: rgba(0,212,255,0.15); color: #00d4ff; border: 1px solid rgba(0,212,255,0.3); }
+        .badge-mayorista { background: rgba(168,85,247,0.15); color: #a855f7; border: 1px solid rgba(168,85,247,0.3); }
+
+        .qr-canvas-wrap {
+            background: #fff;
+            border-radius: 16px;
+            padding: 16px;
+            display: inline-block;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+        }
+
+        .qr-canvas-wrap canvas { display: block; }
+
+        .qr-description {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 1.25rem;
+            letter-spacing: 0.5px;
+            min-height: 36px;
+        }
+
+        .qr-url {
+            font-size: 0.72rem;
+            color: rgba(0,212,255,0.6);
+            font-family: monospace;
+            word-break: break-all;
+            margin-bottom: 1.25rem;
+            padding: 8px 10px;
+            background: rgba(0,212,255,0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(0,212,255,0.1);
+        }
+
+        .qr-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn-download {
+            flex: 1;
+            padding: 10px;
+            background: linear-gradient(135deg, #00d4ff, #7b2ff7);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .btn-download:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,212,255,0.3); }
+
+        .btn-copy {
+            padding: 10px 14px;
+            background: rgba(255,255,255,0.07);
+            color: var(--text-muted);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-copy:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
+        .btn-copy.copied { color: #10b981; border-color: rgba(16,185,129,0.4); }
+
+        /* Nav */
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            animation: fadeDown 0.6s ease 0.1s both;
+        }
+
+        .nav-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.82rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 7px 16px;
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            transition: 0.3s;
+        }
+
+        .nav-link:hover { color: #fff; border-color: rgba(0,212,255,0.4); }
+
+        @media (max-width: 720px) {
+            .qr-grid { grid-template-columns: 1fr; }
+            .url-config { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="aurora" aria-hidden="true">
+        <div class="aurora-orb orb-1"></div>
+        <div class="aurora-orb orb-2"></div>
+        <div class="aurora-orb orb-3"></div>
+    </div>
+
+    <div class="container">
+        <div class="nav-links">
+            <a href="index.html" class="nav-link">← Tienda</a>
+            <a href="admin.html" class="nav-link">Panel Admin</a>
+        </div>
+
+        <div class="page-header">
+            <h1>Códigos QR</h1>
+            <p>Compartí tu catálogo — elegí el QR según tu cliente</p>
+        </div>
+
+        <div class="url-config">
+            <label>URL base</label>
+            <input type="url" id="baseUrl" placeholder="https://tu-tienda.com/index.html">
+            <button class="btn-generate" onclick="generateAll()">Generar QRs</button>
+        </div>
+
+        <div class="qr-grid">
+            <!-- General -->
+            <div class="qr-card">
+                <div class="qr-badge badge-general">General</div>
+                <div class="qr-canvas-wrap">
+                    <canvas id="qr-general"></canvas>
+                </div>
+                <p class="qr-description">Tienda completa con selector Minorista / Mayorista</p>
+                <div class="qr-url" id="url-general">—</div>
+                <div class="qr-actions">
+                    <button class="btn-download" onclick="downloadQR('qr-general', 'QR-CleanStore-General')">↓ Descargar</button>
+                    <button class="btn-copy" id="copy-general" onclick="copyUrl('url-general', 'copy-general')">Copiar</button>
+                </div>
+            </div>
+
+            <!-- Minorista -->
+            <div class="qr-card">
+                <div class="qr-badge badge-minorista">Minorista</div>
+                <div class="qr-canvas-wrap">
+                    <canvas id="qr-minorista"></canvas>
+                </div>
+                <p class="qr-description">Abre la tienda directo en precios minorista</p>
+                <div class="qr-url" id="url-minorista">—</div>
+                <div class="qr-actions">
+                    <button class="btn-download" onclick="downloadQR('qr-minorista', 'QR-CleanStore-Minorista')">↓ Descargar</button>
+                    <button class="btn-copy" id="copy-minorista" onclick="copyUrl('url-minorista', 'copy-minorista')">Copiar</button>
+                </div>
+            </div>
+
+            <!-- Mayorista -->
+            <div class="qr-card">
+                <div class="qr-badge badge-mayorista">Mayorista</div>
+                <div class="qr-canvas-wrap">
+                    <canvas id="qr-mayorista"></canvas>
+                </div>
+                <p class="qr-description">Abre la tienda directo en precios mayorista</p>
+                <div class="qr-url" id="url-mayorista">—</div>
+                <div class="qr-actions">
+                    <button class="btn-download" onclick="downloadQR('qr-mayorista', 'QR-CleanStore-Mayorista')">↓ Descargar</button>
+                    <button class="btn-copy" id="copy-mayorista" onclick="copyUrl('url-mayorista', 'copy-mayorista')">Copiar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const QR_SIZE = 220;
+        const QR_OPTS = {
+            width: QR_SIZE,
+            height: QR_SIZE,
+            colorDark: '#000000',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel ? QRCode.CorrectLevel.M : 1,
+        };
+
+        function detectBaseUrl() {
+            const loc = window.location;
+            return loc.origin + loc.pathname.replace('qr.html', 'index.html');
+        }
+
+        function generateAll() {
+            const raw = document.getElementById('baseUrl').value.trim() || detectBaseUrl();
+
+            const urls = {
+                general:    raw,
+                minorista:  raw + '?modo=minorista',
+                mayorista:  raw + '?modo=mayorista',
+            };
+
+            Object.entries(urls).forEach(([key, url]) => {
+                document.getElementById(`url-${key}`).textContent = url;
+
+                const canvas = document.getElementById(`qr-${key}`);
+                QRCode.toCanvas(canvas, url, {
+                    width: QR_SIZE,
+                    margin: 1,
+                    color: { dark: '#000000', light: '#ffffff' },
+                    errorCorrectionLevel: 'M',
+                }, err => { if (err) console.error(err); });
+            });
+        }
+
+        function downloadQR(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = filename + '.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        function copyUrl(urlElId, btnId) {
+            const url = document.getElementById(urlElId).textContent;
+            if (url === '—') return;
+            navigator.clipboard.writeText(url).then(() => {
+                const btn = document.getElementById(btnId);
+                btn.textContent = '✓ Copiado';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = 'Copiar';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        // Auto-detect URL and generate on load
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('baseUrl').value = detectBaseUrl();
+            generateAll();
+        });
+    </script>
+</body>
+
+</html>
