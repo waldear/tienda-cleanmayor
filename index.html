@@ -592,6 +592,168 @@
             display: none;
         }
 
+        /* ===== EFECTO TRAPITO / BARRIDO ===== */
+        .wipe-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 120%; height: 100%;
+            z-index: 900;
+            pointer-events: none;
+            transform: translateX(-110%);
+            background:
+                repeating-linear-gradient(
+                    -52deg,
+                    rgba(255,255,255,0.015) 0px,
+                    rgba(255,255,255,0.015) 2px,
+                    transparent 2px,
+                    transparent 12px
+                ),
+                linear-gradient(
+                    90deg,
+                    transparent 0%,
+                    rgba(0, 180, 220, 0.55) 25%,
+                    rgba(0, 212, 255, 0.75) 45%,
+                    rgba(100, 60, 220, 0.7) 65%,
+                    rgba(168, 85, 247, 0.5) 80%,
+                    transparent 100%
+                );
+            border-right: 2px solid rgba(0, 212, 255, 0.6);
+            filter: blur(0.5px);
+        }
+
+        .wipe-overlay.wiping {
+            animation: trapito 0.72s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes trapito {
+            0%   { transform: translateX(-110%); }
+            42%  { transform: translateX(-5%);   }
+            58%  { transform: translateX(-5%);   }
+            100% { transform: translateX(110%);  }
+        }
+
+        /* ===== MODAL SELECTOR DE MODO ===== */
+        .mode-selector {
+            position: fixed;
+            inset: 0;
+            z-index: 2500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            background: rgba(0, 0, 10, 0.7);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            animation: selectorIn 0.6s ease;
+        }
+
+        .mode-selector.closing {
+            animation: selectorOut 0.45s ease forwards;
+        }
+
+        @keyframes selectorIn  { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes selectorOut { from { opacity: 1; } to { opacity: 0; } }
+
+        .mode-selector-inner {
+            text-align: center;
+            max-width: 560px;
+            width: 100%;
+            animation: selectorSlide 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes selectorSlide { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .mode-selector-inner img {
+            width: 120px;
+            filter: invert(1) brightness(2) contrast(3);
+            mix-blend-mode: screen;
+            margin-bottom: 1.5rem;
+        }
+
+        .mode-selector-inner h2 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin-bottom: 0.4rem;
+            letter-spacing: -0.5px;
+        }
+
+        .mode-selector-inner > p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            margin-bottom: 2.5rem;
+        }
+
+        .selector-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+        }
+
+        .selector-card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2rem 1.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .selector-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 24px;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .selector-card.min-card::before { background: radial-gradient(circle at 50% 0%, rgba(0,212,255,0.15), transparent 70%); }
+        .selector-card.may-card::before { background: radial-gradient(circle at 50% 0%, rgba(168,85,247,0.15), transparent 70%); }
+
+        .selector-card:hover { transform: translateY(-8px); }
+        .selector-card.min-card:hover { border-color: rgba(0,212,255,0.5); box-shadow: 0 20px 50px rgba(0,212,255,0.12); }
+        .selector-card.may-card:hover { border-color: rgba(168,85,247,0.5); box-shadow: 0 20px 50px rgba(168,85,247,0.12); }
+        .selector-card:hover::before { opacity: 1; }
+
+        .selector-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+
+        .selector-card h3 {
+            font-size: 1.1rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            margin-bottom: 0.4rem;
+        }
+
+        .selector-card.min-card h3 { color: #00d4ff; }
+        .selector-card.may-card h3 { color: #a855f7; }
+
+        .selector-card p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .selector-card .selector-cta {
+            display: inline-block;
+            margin-top: 1.25rem;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .min-card .selector-cta { background: rgba(0,212,255,0.15); color: #00d4ff; border: 1px solid rgba(0,212,255,0.3); }
+        .may-card .selector-cta { background: rgba(168,85,247,0.15); color: #a855f7; border: 1px solid rgba(168,85,247,0.3); }
+
+        @media (max-width: 480px) {
+            .selector-options { grid-template-columns: 1fr; }
+        }
+
         .order-summary {
             background: rgba(0, 212, 255, 0.04);
             border: 1px solid rgba(0, 212, 255, 0.15);
@@ -693,6 +855,32 @@
         </div>
     </main>
 
+    <!-- Efecto trapito -->
+    <div id="wipeOverlay" class="wipe-overlay"></div>
+
+    <!-- Selector de modo al entrar -->
+    <div id="modeSelector" class="mode-selector">
+        <div class="mode-selector-inner">
+            <img src="logo.png" alt="Clean Store">
+            <h2>¿Cómo querés comprar?</h2>
+            <p>Elegí tu tipo de precio para ver el catálogo</p>
+            <div class="selector-options">
+                <div class="selector-card min-card" onclick="selectMode('minorista')">
+                    <div class="selector-icon">🛒</div>
+                    <h3>MINORISTA</h3>
+                    <p>Precios unitarios para consumo personal</p>
+                    <span class="selector-cta">Entrar →</span>
+                </div>
+                <div class="selector-card may-card" onclick="selectMode('mayorista')">
+                    <div class="selector-icon">📦</div>
+                    <h3>MAYORISTA</h3>
+                    <p>Precios por volumen para reventa</p>
+                    <span class="selector-cta">Entrar →</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <footer style="text-align: center; padding: 4rem 1rem; opacity: 0.25; font-size: 0.8rem; letter-spacing: 2px; position: relative; z-index: 1;">
         <p>© 2026 CLEAN STORE</p>
     </footer>
@@ -772,13 +960,16 @@
         let pricelist = 'minorista';
 
         async function loadShop() {
-            // Leer parámetro ?modo= de la URL para QR dinámicos
+            // Leer parámetro ?modo= de la URL (QR dinámicos)
             const params = new URLSearchParams(window.location.search);
             const modoParam = params.get('modo');
-            if (modoParam === 'mayorista') {
-                pricelist = 'mayorista';
-                document.getElementById('btnMinorista').classList.remove('active');
-                document.getElementById('btnMayorista').classList.add('active');
+            if (modoParam === 'minorista' || modoParam === 'mayorista') {
+                pricelist = modoParam;
+                document.getElementById('btnMinorista').classList.toggle('active', modoParam === 'minorista');
+                document.getElementById('btnMayorista').classList.toggle('active', modoParam === 'mayorista');
+                // El cliente ya llegó con un modo definido: cerrar el selector sin barrido
+                const sel = document.getElementById('modeSelector');
+                if (sel) sel.remove();
             }
 
             try {
@@ -852,12 +1043,34 @@
             document.getElementById('cartBar').classList.toggle('hidden', count === 0);
         }
 
+        function selectMode(mode) {
+            const selector = document.getElementById('modeSelector');
+            selector.classList.add('closing');
+            selector.addEventListener('animationend', () => selector.remove(), { once: true });
+
+            if (mode !== pricelist) {
+                // El barrido arranca mientras el selector cierra
+                setTimeout(() => wipeAndSwitch(mode), 150);
+            }
+        }
+
+        function wipeAndSwitch(mode) {
+            const overlay = document.getElementById('wipeOverlay');
+            overlay.classList.add('wiping');
+            // Actualizar precios en el punto medio (cuando el trapito cubre la pantalla)
+            setTimeout(() => {
+                pricelist = mode;
+                document.getElementById('btnMinorista').classList.toggle('active', mode === 'minorista');
+                document.getElementById('btnMayorista').classList.toggle('active', mode === 'mayorista');
+                drawGrid();
+                refreshCart();
+            }, 310);
+            overlay.addEventListener('animationend', () => overlay.classList.remove('wiping'), { once: true });
+        }
+
         function changePricelist(mode) {
-            pricelist = mode;
-            document.getElementById('btnMinorista').classList.toggle('active', mode === 'minorista');
-            document.getElementById('btnMayorista').classList.toggle('active', mode === 'mayorista');
-            drawGrid();
-            refreshCart();
+            if (mode === pricelist) return;
+            wipeAndSwitch(mode);
         }
 
         function toggleCheckout(show) {
