@@ -100,6 +100,7 @@ function doPost(e) {
       data.productos.map(p => `${p.product} (x${p.quantity})`).join(", "),
       data.modo,
       data.totalItems,
+      data.totalPrice || 0,
       data.tipoEntrega,
       data.direccion || "Retiro",
       data.referencias || "",
@@ -138,11 +139,16 @@ function generarFacturaPDF(data) {
   body.replaceText("{{NUMERO_PEDIDO}}", data.numeroPedido);
   body.replaceText("{{FECHA}}", new Date().toLocaleDateString("es-AR"));
   body.replaceText("{{CLIENTE}}", data.clienteNombre || "Cliente Web");
-  body.replaceText("{{PRODUCTOS}}", data.productos.map(p => `• ${p.product} (x${p.quantity})`).join("\n"));
+  const detalle = data.productos.map(p => {
+    const sub = p.subtotal ? ` — $${Number(p.subtotal).toLocaleString("es-AR")}` : "";
+    return `• ${p.product} (x${p.quantity})${sub}`;
+  }).join("\n");
+  body.replaceText("{{PRODUCTOS}}", detalle);
   body.replaceText("{{MODO}}", data.modo);
   body.replaceText("{{ENTREGA}}", data.tipoEntrega);
   body.replaceText("{{DIRECCION}}", data.direccion || "Retiro en local");
-  body.replaceText("{{TOTAL_ITEMS}}", data.totalItems);
+  body.replaceText("{{TOTAL_ITEMS}}", data.totalItems.toString());
+  body.replaceText("{{TOTAL_PRECIO}}", data.totalPrice ? `$${Number(data.totalPrice).toLocaleString("es-AR")}` : "—");
   
   doc.saveAndClose();
   const pdfBlob = DriveApp.getFileById(copia.getId()).getAs(MimeType.PDF);
@@ -158,12 +164,13 @@ function generarMensajeWhatsApp(data, pdfUrl) {
   message += `📞 *Tel:* ${data.clienteTelefono}\n\n`;
   message += `*Productos:*\n`;
   data.productos.forEach(item => {
-    message += `• ${item.product} (x${item.quantity})\n`;
+    const sub = item.subtotal ? ` — $${Number(item.subtotal).toLocaleString("es-AR")}` : "";
+    message += `• ${item.product} (x${item.quantity})${sub}\n`;
   });
+  if (data.totalPrice) message += `\n💰 *Total: $${Number(data.totalPrice).toLocaleString("es-AR")}*\n`;
   message += `\n*Modo:* ${data.modo}\n`;
   message += `*Entrega:* ${data.tipoEntrega}\n`;
   if(data.direccion) message += `*Dirección:* ${data.direccion}\n`;
-  message += `\n*📄 Factura:* ${pdfUrl}\n`;
-  message += `\n*Total de ítems:* ${data.totalItems}`;
+  message += `\n*📄 Factura:* ${pdfUrl}`;
   return message;
 }

@@ -592,6 +592,51 @@
             display: none;
         }
 
+        .order-summary {
+            background: rgba(0, 212, 255, 0.04);
+            border: 1px solid rgba(0, 212, 255, 0.15);
+            border-radius: 14px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.88rem;
+        }
+
+        .order-summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            color: var(--text-muted);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .order-summary-row:last-child { border-bottom: none; }
+
+        .order-summary-row .item-name { flex: 1; }
+        .order-summary-row .item-qty { margin: 0 1rem; opacity: 0.6; }
+        .order-summary-row .item-sub { font-weight: 600; color: #fff; }
+
+        .order-summary-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 10px;
+            margin-top: 6px;
+            border-top: 1px solid rgba(0,212,255,0.2);
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .order-summary-total .total-label { color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; font-size: 0.75rem; }
+
+        .order-summary-total .total-value {
+            font-size: 1.3rem;
+            background: var(--accent-grad);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
         @media (max-width: 640px) {
             .hero h2 {
                 font-size: 2rem;
@@ -680,7 +725,10 @@
 
     <div id="modal" class="checkout-modal">
         <div class="modal-content">
-            <h3 class="form-title">🛒 Detalle del Pedido</h3>
+            <h3 class="form-title">Tu Pedido</h3>
+
+            <!-- Resumen de precios -->
+            <div id="orderSummary" class="order-summary"></div>
 
             <div class="field">
                 <label>Nombre y Apellido</label>
@@ -804,7 +852,35 @@
         }
 
         function toggleCheckout(show) {
+            if (show) renderOrderSummary();
             document.getElementById('modal').style.display = show ? 'flex' : 'none';
+        }
+
+        function renderOrderSummary() {
+            const el = document.getElementById('orderSummary');
+            let html = '';
+            let total = 0;
+
+            Object.keys(items).forEach(n => {
+                const p = products.find(prod => prod.name === n);
+                const unitPrice = pricelist === 'minorista' ? p.priceMinorista : p.priceMayorista;
+                const subtotal = items[n] * unitPrice;
+                total += subtotal;
+                html += `
+                    <div class="order-summary-row">
+                        <span class="item-name">${n}</span>
+                        <span class="item-qty">x${items[n]}</span>
+                        <span class="item-sub">$${subtotal.toLocaleString('es-AR')}</span>
+                    </div>`;
+            });
+
+            html += `
+                <div class="order-summary-total">
+                    <span class="total-label">Total</span>
+                    <span class="total-value">$${total.toLocaleString('es-AR')}</span>
+                </div>`;
+
+            el.innerHTML = html;
         }
 
         function checkAddress() {
@@ -823,24 +899,34 @@
 
             document.getElementById('loading').style.display = 'flex';
 
+            const productosConPrecio = Object.keys(items).map(n => {
+                const p = products.find(prod => prod.name === n);
+                const unitPrice = pricelist === 'minorista' ? p.priceMinorista : p.priceMayorista;
+                return { product: n, quantity: items[n], price: unitPrice, subtotal: items[n] * unitPrice };
+            });
+
+            const totalPrice = productosConPrecio.reduce((acc, i) => acc + i.subtotal, 0);
+
             const orderData = {
                 numeroPedido: "ORD-" + Math.floor(Date.now() / 1000),
                 clienteNombre: name,
                 clienteTelefono: phone,
-                productos: Object.keys(items).map(n => ({ product: n, quantity: items[n] })),
+                productos: productosConPrecio,
                 modo: pricelist.toUpperCase(),
                 totalItems: Object.values(items).reduce((a, b) => a + b, 0),
+                totalPrice: totalPrice,
                 tipoEntrega: delivery === 'retiro' ? 'Retiro' : 'Domicilio',
                 direccion: address,
                 notas: document.getElementById('f-notes').value,
                 invoiceMethod: 'WhatsApp'
             };
 
-            // Construir mensaje de WhatsApp localmente para asegurar velocidad
+            // Construir mensaje de WhatsApp localmente
             let text = `👋 *¡Hola Clean Store!* \nQuisiera realizar el siguiente pedido:\n\n`;
             orderData.productos.forEach(i => {
-                text += `• ${i.product} (x${i.quantity})\n`;
+                text += `• ${i.product} (x${i.quantity}) — $${i.subtotal.toLocaleString('es-AR')}\n`;
             });
+            text += `\n💰 *Total: $${totalPrice.toLocaleString('es-AR')}*`;
             text += `\n📍 *Entrega:* ${orderData.tipoEntrega}${address ? ` (${address})` : ''}`;
             text += `\n👤 *Cliente:* ${name}`;
 
