@@ -1,0 +1,25 @@
+{
+  "name": "project-videos",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "render": "remotion render src/index.ts CleanStoreDemo out/cleanstore-demo.mp4",
+    "render:gif": "remotion render src/index.ts CleanStoreDemo out/cleanstore-demo.gif --image-format png"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@remotion/cli": "4.0.438",
+    "@remotion/player": "4.0.438",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "remotion": "4.0.438"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.14",
+    "typescript": "6.0.2"
+  }
+}
