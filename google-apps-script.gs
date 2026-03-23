@@ -12,6 +12,27 @@ function doGet(e) {
   try {
     const action = e.parameter.action;
     
+    // CASO: Verificar PIN de Admin desde hoja Config
+    if (action === "verificarPin") {
+      const pinIngresado = e.parameter.pin;
+      const ssPedidos = SpreadsheetApp.openById(CONFIG.PEDIDOS_SS_ID);
+      const sheetConfig = ssPedidos.getSheetByName("Config");
+      let pinCorrecto = "349893"; // valor por defecto si no existe la hoja Config
+      if (sheetConfig) {
+        const filas = sheetConfig.getDataRange().getValues();
+        for (let i = 0; i < filas.length; i++) {
+          if (filas[i][0].toString() === "PIN_ADMIN") {
+            pinCorrecto = filas[i][1].toString();
+            break;
+          }
+        }
+      }
+      return ContentService.createTextOutput(JSON.stringify({
+        status: "success",
+        valid: pinIngresado === pinCorrecto
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
     // CASO: Obtener Pedidos para el Panel de Control
     if (action === "pedidos") {
       const ssPedidos = SpreadsheetApp.openById(CONFIG.PEDIDOS_SS_ID);

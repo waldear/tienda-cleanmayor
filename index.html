@@ -561,7 +561,7 @@
             <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1.5rem;">Ingresa el PIN de seguridad
             </p>
 
-            <input type="password" id="adminPin" maxlength="4" placeholder="••••"
+            <input type="password" id="adminPin" maxlength="10" placeholder="••••••"
                 style="text-align:center; font-size: 2rem; letter-spacing: 10px; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 15px; color: #fff; width: 100%; box-sizing: border-box; margin-bottom: 1.5rem;">
 
             <button class="checkout-btn" onclick="checkPin()">INGRESAR</button>
@@ -794,13 +794,25 @@
             else document.getElementById('adminPin').value = '';
         }
 
-        function checkPin() {
+        async function checkPin() {
             const pin = document.getElementById('adminPin').value;
-            if (pin === '349893') {
-                window.location.href = 'admin.html';
-            } else {
-                alert('PIN Incorrecto');
-                document.getElementById('adminPin').value = '';
+            const btn = document.querySelector('#adminModal .checkout-btn');
+            btn.textContent = 'Verificando...';
+            btn.disabled = true;
+            try {
+                const res = await fetch(`${SCRIPT_URL}?action=verificarPin&pin=${encodeURIComponent(pin)}`);
+                const data = await res.json();
+                if (data.valid) {
+                    window.location.href = 'admin.html';
+                } else {
+                    alert('PIN Incorrecto');
+                    document.getElementById('adminPin').value = '';
+                }
+            } catch(err) {
+                alert('Error de conexión. Intentá de nuevo.');
+            } finally {
+                btn.textContent = 'INGRESAR';
+                btn.disabled = false;
             }
         }
 
