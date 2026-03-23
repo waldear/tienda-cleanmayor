@@ -469,9 +469,11 @@
             -webkit-backdrop-filter: blur(30px) saturate(150%);
             z-index: 2000;
             display: none;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
             padding: 1rem;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .checkout-modal.active {
@@ -498,6 +500,8 @@
             max-width: 450px;
             padding: 2rem;
             position: relative;
+            margin: auto 0;
+            flex-shrink: 0;
         }
 
         .form-title {
@@ -960,6 +964,7 @@
 
     <div id="modal" class="checkout-modal">
         <div class="modal-content">
+            <button class="cancel-btn" onclick="toggleCheckout(false)" style="margin-bottom: 1rem;">← Volver al catálogo</button>
             <h3 class="form-title">Tu Pedido</h3>
 
             <!-- Resumen de precios -->
@@ -994,7 +999,6 @@
             </div>
 
             <button class="checkout-btn" onclick="sendOrder()">CONFIRMAR PEDIDO</button>
-            <button class="cancel-btn" onclick="toggleCheckout(false)">Cerrar</button>
         </div>
     </div>
 
@@ -1067,7 +1071,7 @@
                             <span class="product-price">$${Number(price).toLocaleString('es-AR')}</span>
                             <div class="qty-picker">
                                 <button onclick="modQty('${p.name}', -1)">-</button>
-                                <span>${items[p.name] || 0}</span>
+                                <span data-qty="${p.name}">${items[p.name] || 0}</span>
                                 <button onclick="modQty('${p.name}', 1)">+</button>
                             </div>
                         </div>
@@ -1081,7 +1085,8 @@
         function modQty(name, delta) {
             items[name] = Math.max(0, (items[name] || 0) + delta);
             if (items[name] === 0) delete items[name];
-            drawGrid();
+            const qtySpan = document.querySelector(`[data-qty="${name}"]`);
+            if (qtySpan) qtySpan.textContent = items[name] || 0;
             refreshCart();
         }
 
