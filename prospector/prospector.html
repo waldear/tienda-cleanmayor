@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prospector de Negocios · Ituzaingó, Corrientes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --surface: rgba(255,255,255,0.05);
+      --surface-hover: rgba(255,255,255,0.09);
+      --border: rgba(255,255,255,0.12);
+      --text: #ffffff;
+      --muted: #888;
+      --accent: #00d4ff;
+      --accent-dim: rgba(0,212,255,0.15);
+      --green: #10b981;
+      --green-dim: rgba(16,185,129,0.15);
+      --yellow: #f59e0b;
+      --yellow-dim: rgba(245,158,11,0.15);
+      --red: #ef4444;
+      --red-dim: rgba(239,68,68,0.15);
+      --wa: #25D366;
+      --transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ─────────────────────────────── */
+    .header {
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 1.25rem 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .header-left { display: flex; align-items: center; gap: 1rem; }
+
+    .header-logo {
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: #fff;
+    }
+
+    .header-logo span { color: var(--accent); }
+
+    .header-location {
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+    }
+
+    .stat-pill {
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 20px;
+      letter-spacing: 0.02em;
+    }
+
+    .stat-pill.red   { background: var(--red-dim);    color: var(--red);    border: 1px solid rgba(239,68,68,0.3); }
+    .stat-pill.total { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(0,212,255,0.3); }
+
+    /* ── FILTERS ─────────────────────────────── */
+    .filters {
+      padding: 1.25rem 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .filter-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-right: 0.25rem;
+    }
+
+    .chip-group { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+    .chip {
+      padding: 7px 16px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .chip:hover { border-color: rgba(255,255,255,0.3); color: #fff; }
+
+    .chip.active {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .chip.active.categoria-gastronomia { background: rgba(245,158,11,0.12); border-color: var(--yellow); color: var(--yellow); }
+    .chip.active.categoria-ferreteria  { background: rgba(168,85,247,0.12); border-color: #a855f7; color: #a855f7; }
+    .chip.active.categoria-mayorista   { background: rgba(16,185,129,0.12); border-color: var(--green); color: var(--green); }
+    .chip.active.categoria-almacen, .chip.active.categoria-kiosco { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+
+    .filter-sep { width: 1px; height: 24px; background: var(--border); align-self: center; }
+
+    .chip.web-sin-web.active  { background: var(--red-dim); border-color: var(--red); color: var(--red); }
+    .chip.web-basica.active   { background: var(--yellow-dim); border-color: var(--yellow); color: var(--yellow); }
+
+    /* ── MAIN ─────────────────────────────────── */
+    .main { padding: 2rem; max-width: 1280px; margin: 0 auto; }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 1rem;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    /* ── GRID ─────────────────────────────────── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      transition: var(--transition);
+      animation: fadeUp 0.4s ease both;
+    }
+
+    .card:hover {
+      background: var(--surface-hover);
+      border-color: rgba(255,255,255,0.2);
+      transform: translateY(-3px);
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; }
+
+    .card-name {
+      font-size: 1rem;
+      font-weight: 700;
+      line-height: 1.3;
+      flex: 1;
+    }
+
+    .badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 9px;
+      border-radius: 6px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .badge.sin-web    { background: var(--red-dim);    color: var(--red);    border: 1px solid rgba(239,68,68,0.3); }
+    .badge.web-basica { background: var(--yellow-dim); color: var(--yellow); border: 1px solid rgba(245,158,11,0.3); }
+    .badge.web-ok     { background: var(--green-dim);  color: var(--green);  border: 1px solid rgba(16,185,129,0.3); }
+
+    .card-meta { display: flex; flex-direction: column; gap: 0.35rem; }
+
+    .meta-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .meta-row svg { flex-shrink: 0; opacity: 0.6; }
+
+    .cat-tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 5px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    .cat-tag.gastronomia { color: var(--yellow); border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.07); }
+    .cat-tag.ferreteria  { color: #a855f7; border-color: rgba(168,85,247,0.3); background: rgba(168,85,247,0.07); }
+    .cat-tag.mayorista   { color: var(--green); border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.07); }
+    .cat-tag.almacen     { color: var(--accent); border-color: rgba(0,212,255,0.3); background: rgba(0,212,255,0.07); }
+    .cat-tag.kiosco      { color: var(--accent); border-color: rgba(0,212,255,0.3); background: rgba(0,212,255,0.07); }
+
+    .rating { color: #f59e0b; font-size: 0.82rem; }
+
+    .card-actions { display: flex; gap: 0.6rem; margin-top: auto; }
+
+    .btn-wa {
+      flex: 1;
+      padding: 10px 14px;
+      background: var(--wa);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: var(--transition);
+      text-decoration: none;
+    }
+
+    .btn-wa:hover { background: #1fba58; transform: translateY(-2px); }
+
+    .btn-maps {
+      padding: 10px 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+      text-decoration: none;
+    }
+
+    .btn-maps:hover { border-color: rgba(255,255,255,0.3); color: #fff; }
+
+    /* ── FOOTER BAR ────────────────────────────── */
+    .footer-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      z-index: 200;
+    }
+
+    .footer-info { font-size: 0.82rem; color: var(--muted); }
+    .footer-info strong { color: #fff; }
+
+    .btn-csv {
+      padding: 10px 22px;
+      background: var(--accent-dim);
+      border: 1px solid rgba(0,212,255,0.4);
+      border-radius: 10px;
+      color: var(--accent);
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: var(--transition);
+      letter-spacing: 0.03em;
+    }
+
+    .btn-csv:hover { background: rgba(0,212,255,0.25); transform: translateY(-2px); }
+
+    /* bottom padding so footer doesn't hide last card */
+    .main { padding-bottom: 6rem; }
+
+    /* ── RESPONSIVE ───────────────────────────── */
+    @media (max-width: 640px) {
+      .header { padding: 1rem; flex-wrap: wrap; }
+      .filters { padding: 1rem; }
+      .main { padding: 1rem 1rem 6rem; }
+      .grid { grid-template-columns: 1fr; }
+      .footer-bar { padding: 0.875rem 1rem; }
+      .header-location { display: none; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-left">
+      <div class="header-logo">Clean<span>Mayor</span></div>
+      <div class="header-location">📍 Ituzaingó, Corrientes</div>
+    </div>
+    <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+      <span class="stat-pill red" id="statSinWeb">— sin web</span>
+      <span class="stat-pill total" id="statTotal">— total</span>
+    </div>
+  </header>
+
+  <!-- FILTERS -->
+  <div class="filters">
+    <span class="filter-label">Categoría</span>
+    <div class="chip-group" id="catChips">
+      <button class="chip active" data-cat="todos" onclick="setFilter('cat','todos',this)">Todos</button>
+      <button class="chip categoria-almacen" data-cat="almacen" onclick="setFilter('cat','almacen',this)">Almacén / Kiosco</button>
+      <button class="chip categoria-mayorista" data-cat="mayorista" onclick="setFilter('cat','mayorista',this)">Mayorista</button>
+      <button class="chip categoria-gastronomia" data-cat="gastronomia" onclick="setFilter('cat','gastronomia',this)">Gastronomía</button>
+      <button class="chip categoria-ferreteria" data-cat="ferreteria" onclick="setFilter('cat','ferreteria',this)">Ferretería</button>
+    </div>
+    <div class="filter-sep"></div>
+    <span class="filter-label">Web</span>
+    <div class="chip-group" id="webChips">
+      <button class="chip active" data-web="todos" onclick="setFilter('web','todos',this)">Todos</button>
+      <button class="chip web-sin-web" data-web="sin_web" onclick="setFilter('web','sin_web',this)">🔴 Sin web</button>
+      <button class="chip web-basica" data-web="mejorable" onclick="setFilter('web','mejorable',this)">🟡 Web mejorable</button>
+    </div>
+  </div>
+
+  <!-- GRID -->
+  <main class="main">
+    <div class="grid" id="grid">
+      <p style="color:var(--muted);grid-column:1/-1;text-align:center;padding:3rem">Cargando negocios...</p>
+    </div>
+  </main>
+
+  <!-- FOOTER BAR -->
+  <div class="footer-bar">
+    <div class="footer-info">
+      Mostrando <strong id="footerCount">0</strong> negocios
+    </div>
+    <button class="btn-csv" onclick="exportCSV()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Exportar CSV
+    </button>
+  </div>
+
+  <script>
+    let allNegocios = [];
+    let filtered = [];
+    let activeCat = 'todos';
+    let activeWeb = 'todos';
+
+    const CATEGORIAS = {
+      almacen:    { label: 'Almacén',    emoji: '🛒' },
+      kiosco:     { label: 'Kiosco',     emoji: '🏪' },
+      mayorista:  { label: 'Mayorista',  emoji: '📦' },
+      gastronomia:{ label: 'Gastronomía',emoji: '🍽️' },
+      ferreteria: { label: 'Ferretería', emoji: '🔧' },
+    };
+
+    function badgeInfo(negocio) {
+      if (!negocio.tiene_web) return { cls: 'sin-web', label: '🔴 Sin web' };
+      if (negocio.estado_web === 'basica' || negocio.estado_web === 'desactualizada')
+        return { cls: 'web-basica', label: negocio.estado_web === 'basica' ? '🟡 Web básica' : '🟡 Web antigua' };
+      return { cls: 'web-ok', label: '🟢 Tiene web' };
+    }
+
+    function buildWAMessage(negocio) {
+      const cat = CATEGORIAS[negocio.categoria] || { label: negocio.categoria, emoji: '' };
+      const intro = negocio.tiene_web
+        ? `Hola ${negocio.nombre}! Vi que su página web podría estar mejor posicionada y actualizada.`
+        : `Hola ${negocio.nombre}! Vi que todavía no tienen página web ni tienda online.`;
+      return `${intro}\n\nSoy de CleanMayor y ofrecemos páginas web con:\n✅ Catálogo de productos\n✅ Pedidos por WhatsApp\n✅ Panel de administración\n✅ Lista en 48hs\n\n¿Les interesa una demo gratuita? 😊`;
+    }
+
+    function stars(rating) {
+      const full = Math.floor(rating);
+      const half = rating - full >= 0.5 ? '½' : '';
+      return '★'.repeat(full) + half + ` ${rating.toFixed(1)}`;
+    }
+
+    function renderCard(n, idx) {
+      const badge = badgeInfo(n);
+      const cat = CATEGORIAS[n.categoria] || { label: n.categoria, emoji: '' };
+      const msg = encodeURIComponent(buildWAMessage(n));
+      const phone = n.telefono.replace(/\D/g,'');
+      const waLink = `https://wa.me/549${phone}?text=${msg}`;
+
+      return `
+        <div class="card" style="animation-delay:${idx * 0.04}s">
+          <div class="card-top">
+            <div class="card-name">${n.nombre}</div>
+            <span class="badge ${badge.cls}">${badge.label}</span>
+          </div>
+          <div class="card-meta">
+            <div class="meta-row">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              ${n.direccion}
+            </div>
+            <div class="meta-row">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 12 19.79 19.79 0 0 1 1.08 3.4 2 2 0 0 1 3.06 1.22h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.09 9.91a16 16 0 0 0 5.55 5.55l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              ${n.telefono}
+              &nbsp;&nbsp;
+              <span class="rating">${stars(n.rating)}</span>
+              <span style="font-size:0.75rem;color:var(--muted)">(${n.resenas})</span>
+            </div>
+            <div class="meta-row" style="margin-top:2px">
+              <span class="cat-tag ${n.categoria}">${cat.emoji} ${cat.label}</span>
+            </div>
+          </div>
+          <div class="card-actions">
+            <a class="btn-wa" href="${waLink}" target="_blank" rel="noopener">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.126.554 4.122 1.524 5.855L.057 23.882a.75.75 0 0 0 .921.964l5.888-1.437A11.938 11.938 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.708 9.708 0 0 1-4.948-1.353l-.354-.213-3.664.895.93-3.538-.232-.369A9.75 9.75 0 1 1 12 21.75z"/></svg>
+              WhatsApp
+            </a>
+            <a class="btn-maps" href="${n.google_maps_url}" target="_blank" rel="noopener" title="Ver en Google Maps">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </a>
+          </div>
+        </div>
+      `;
+    }
+
+    function applyFilters() {
+      filtered = allNegocios.filter(n => {
+        const catMatch = activeCat === 'todos' ||
+          n.categoria === activeCat ||
+          (activeCat === 'almacen' && (n.categoria === 'almacen' || n.categoria === 'kiosco'));
+
+        let webMatch = true;
+        if (activeWeb === 'sin_web')   webMatch = !n.tiene_web;
+        if (activeWeb === 'mejorable') webMatch = n.tiene_web && n.estado_web !== null;
+
+        return catMatch && webMatch;
+      });
+    }
+
+    function render() {
+      applyFilters();
+      const grid = document.getElementById('grid');
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '<p class="empty-state">No hay negocios con esos filtros.</p>';
+      } else {
+        grid.innerHTML = filtered.map((n, i) => renderCard(n, i)).join('');
+      }
+
+      const sinWeb = filtered.filter(n => !n.tiene_web).length;
+      document.getElementById('statSinWeb').textContent = `${sinWeb} sin web`;
+      document.getElementById('statTotal').textContent  = `${filtered.length} total`;
+      document.getElementById('footerCount').textContent = filtered.length;
+    }
+
+    function setFilter(type, value, btn) {
+      if (type === 'cat') {
+        activeCat = value;
+        document.querySelectorAll('#catChips .chip').forEach(c => c.classList.remove('active'));
+      } else {
+        activeWeb = value;
+        document.querySelectorAll('#webChips .chip').forEach(c => c.classList.remove('active'));
+      }
+      btn.classList.add('active');
+      render();
+    }
+
+    function exportCSV() {
+      const headers = ['Nombre','Categoría','Dirección','Teléfono','Rating','Reseñas','Tiene Web','Estado Web','Mensaje WhatsApp'];
+      const rows = filtered.map(n => [
+        `"${n.nombre}"`,
+        `"${CATEGORIAS[n.categoria]?.label || n.categoria}"`,
+        `"${n.direccion}"`,
+        n.telefono,
+        n.rating,
+        n.resenas,
+        n.tiene_web ? 'Sí' : 'No',
+        n.estado_web || (n.tiene_web ? 'OK' : 'Sin web'),
+        `"${buildWAMessage(n).replace(/"/g,'""').replace(/\n/g,' ')}"`
+      ]);
+
+      const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `prospectos-ituzaingo-${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    async function init() {
+      try {
+        const res = await fetch('negocios-mock.json');
+        allNegocios = await res.json();
+      } catch {
+        // fallback inline si no hay servidor HTTP
+        allNegocios = [];
+        document.getElementById('grid').innerHTML =
+          '<p class="empty-state">⚠️ Abrí este archivo desde un servidor local.<br><small style="color:var(--muted)">Ejecutá: <code style="background:rgba(255,255,255,0.07);padding:2px 6px;border-radius:4px">npx serve .</code> en la carpeta del proyecto.</small></p>';
+        return;
+      }
+      render();
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
