@@ -1,0 +1,3 @@
+# API keys y configuración sensible
+.claude/settings.json
+.claude/settings.local.json
