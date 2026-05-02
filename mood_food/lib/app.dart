@@ -4,15 +4,15 @@ import 'controllers/cart_controller.dart';
 import 'screens/splash_screen.dart';
 import 'theme/app_theme.dart';
 
-class MoodFoodApp extends StatelessWidget {
-  const MoodFoodApp({super.key});
+class CleanMayorApp extends StatelessWidget {
+  const CleanMayorApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => CartController(),
       child: MaterialApp(
-        title: 'Mood Food',
+        title: 'Clean Mayor',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.theme,
         home: const SplashScreen(),

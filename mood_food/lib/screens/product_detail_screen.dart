@@ -35,7 +35,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     }
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('${widget.product.name} added to cart'),
+        content: Text('${widget.product.name} agregado al pedido'),
         backgroundColor: widget.product.color,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -46,17 +46,19 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cart = context.watch<CartController>();
     final related = productsByCategory(widget.product.category)
         .where((p) => p.id != widget.product.id)
         .toList();
     final color = widget.product.color;
+    final price = widget.product.currentPrice(cart.isMayorista);
 
     return Scaffold(
       backgroundColor: Colors.white,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            expandedHeight: 320,
+            expandedHeight: 300,
             pinned: true,
             backgroundColor: Colors.white,
             foregroundColor: AppTheme.textDark,
@@ -81,8 +83,22 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   widget.product.imageUrl,
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => Container(
-                    color: color.withValues(alpha: 0.15),
-                    child: Icon(Icons.fastfood, size: 80, color: color),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          color.withValues(alpha: 0.15),
+                          color.withValues(alpha: 0.05),
+                        ],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        widget.product.category.emoji,
+                        style: const TextStyle(fontSize: 80),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -94,21 +110,42 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Category badge
                   Row(
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: color.withValues(alpha: 0.15),
+                          color: color.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          widget.product.category.label,
+                          '${widget.product.category.emoji}  ${widget.product.category.label}',
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                             color: color,
+                          ),
+                        ),
+                      ),
+                      const Spacer(),
+                      // Pricelist badge
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppTheme.surface,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                              color: const Color(0xFFE2E8F0)),
+                        ),
+                        child: Text(
+                          cart.isMayorista ? 'Mayorista' : 'Minorista',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.textMuted,
                           ),
                         ),
                       ),
@@ -118,7 +155,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   Text(
                     widget.product.name,
                     style: const TextStyle(
-                      fontSize: 26,
+                      fontSize: 24,
                       fontWeight: FontWeight.w800,
                       color: AppTheme.textDark,
                     ),
@@ -129,7 +166,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     style: const TextStyle(
                       fontSize: 14,
                       color: AppTheme.textMuted,
-                      height: 1.5,
+                      height: 1.6,
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -137,7 +174,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        formatPrice(widget.product.price),
+                        formatPrice(price),
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.w800,
@@ -154,9 +191,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   const SizedBox(height: 24),
                   if (related.isNotEmpty) ...[
                     const Text(
-                      'You might also like',
+                      'También te puede interesar',
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 15,
                         fontWeight: FontWeight.w700,
                         color: AppTheme.textDark,
                       ),
@@ -167,13 +204,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
                         itemCount: related.length,
-                        separatorBuilder: (_, __) => const SizedBox(width: 12),
+                        separatorBuilder: (_, __) =>
+                            const SizedBox(width: 10),
                         itemBuilder: (context, i) => GestureDetector(
                           onTap: () => Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (_) =>
-                                  ProductDetailScreen(product: related[i]),
+                              builder: (_) => ProductDetailScreen(
+                                  product: related[i]),
                             ),
                           ),
                           child: ClipRRect(
@@ -188,9 +226,19 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 errorBuilder: (_, __, ___) => Container(
                                   width: 90,
                                   height: 90,
-                                  color: related[i].color.withValues(alpha: 0.2),
-                                  child: Icon(Icons.fastfood,
-                                      color: related[i].color),
+                                  decoration: BoxDecoration(
+                                    color: related[i]
+                                        .color
+                                        .withValues(alpha: 0.12),
+                                    borderRadius:
+                                        BorderRadius.circular(12),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      related[i].category.emoji,
+                                      style: const TextStyle(fontSize: 32),
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
@@ -201,7 +249,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     const SizedBox(height: 24),
                   ],
                   PrimaryButton(
-                    label: 'Continue',
+                    label: 'Agregar al pedido',
                     backgroundColor: color,
                     onPressed: () {
                       _addToCart();

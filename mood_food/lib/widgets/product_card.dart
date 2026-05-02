@@ -43,9 +43,13 @@ class ProductCard extends StatelessWidget {
                     fit: BoxFit.cover,
                     width: double.infinity,
                     errorBuilder: (_, __, ___) => Container(
-                      color: product.color.withValues(alpha: 0.2),
-                      child: Icon(Icons.fastfood,
-                          size: 48, color: product.color),
+                      color: product.color.withValues(alpha: 0.12),
+                      child: Center(
+                        child: Text(
+                          product.category.emoji,
+                          style: const TextStyle(fontSize: 48),
+                        ),
+                      ),
                     ),
                   ),
                 ),

@@ -6,5 +6,6 @@ class CartItem {
 
   CartItem({required this.product, this.quantity = 1});
 
-  double get lineTotal => product.price * quantity;
+  double lineTotal(bool isMayorista) =>
+      product.currentPrice(isMayorista) * quantity;
 }

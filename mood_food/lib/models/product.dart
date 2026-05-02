@@ -1,27 +1,38 @@
 import 'package:flutter/material.dart';
 
-enum MoodCategory { pizza, salad, drink }
+enum CleanCategory { detergentes, desinfectantes, accesorios }
 
-extension MoodCategoryX on MoodCategory {
+extension CleanCategoryX on CleanCategory {
   String get label {
     switch (this) {
-      case MoodCategory.pizza:
-        return 'Pizza Mood';
-      case MoodCategory.salad:
-        return 'Salad Mood';
-      case MoodCategory.drink:
-        return 'Drink Mood';
+      case CleanCategory.detergentes:
+        return 'Detergentes';
+      case CleanCategory.desinfectantes:
+        return 'Desinfectantes';
+      case CleanCategory.accesorios:
+        return 'Accesorios';
+    }
+  }
+
+  String get emoji {
+    switch (this) {
+      case CleanCategory.detergentes:
+        return '🧴';
+      case CleanCategory.desinfectantes:
+        return '🫧';
+      case CleanCategory.accesorios:
+        return '🧽';
     }
   }
 
   Color get color {
     switch (this) {
-      case MoodCategory.pizza:
-        return const Color(0xFFFFC107);
-      case MoodCategory.salad:
-        return const Color(0xFF8BC34A);
-      case MoodCategory.drink:
-        return const Color(0xFFE53935);
+      case CleanCategory.detergentes:
+        return const Color(0xFF2563EB);
+      case CleanCategory.desinfectantes:
+        return const Color(0xFF0D9488);
+      case CleanCategory.accesorios:
+        return const Color(0xFFD97706);
     }
   }
 }
@@ -29,8 +40,9 @@ extension MoodCategoryX on MoodCategory {
 class Product {
   final String id;
   final String name;
-  final MoodCategory category;
+  final CleanCategory category;
   final double price;
+  final double priceMayorista;
   final String imageUrl;
   final String description;
 
@@ -39,9 +51,13 @@ class Product {
     required this.name,
     required this.category,
     required this.price,
+    required this.priceMayorista,
     required this.imageUrl,
     required this.description,
   });
 
   Color get color => category.color;
+
+  double currentPrice(bool isMayorista) =>
+      isMayorista ? priceMayorista : price;
 }
