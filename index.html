@@ -235,10 +235,6 @@
             justify-content: center;
             background-size: cover;
             background-position: center;
-            font-size: 3.5rem;
-            font-weight: 700;
-            color: var(--accent);
-            letter-spacing: -1px;
             position: relative;
             overflow: hidden;
         }
@@ -246,8 +242,43 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.04) 100%);
+            background: linear-gradient(to bottom, transparent 55%, rgba(0,0,0,0.06) 100%);
             pointer-events: none;
+        }
+
+        /* ── FALLBACK VISUAL ── */
+        .prod-fallback {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        .prod-fallback::before {
+            content: '';
+            position: absolute;
+            width: 140px; height: 140px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.15);
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .prod-fallback-icon {
+            font-size: 3.8rem;
+            line-height: 1;
+            position: relative;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+        }
+        .prod-fallback-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.85);
+            position: relative;
         }
 
         .product-info {
@@ -627,6 +658,48 @@
         let items = {};
         let pricelist = 'minorista';
 
+        function getProductVisual(name) {
+            const n = name.toLowerCase();
+            if (/detergente|lavavajilla|lavaplato|jabón liq|jabon liq/.test(n))
+                return { g: '135deg,#60A5FA,#2563EB', icon: '🧴', label: 'Detergente' };
+            if (/lavandina|cloro|hipoclorito|blanqueador/.test(n))
+                return { g: '135deg,#34D399,#059669', icon: '🫧', label: 'Desinfección' };
+            if (/desengrasante|grasa|industrial/.test(n))
+                return { g: '135deg,#FB923C,#EA580C', icon: '✨', label: 'Desengrasante' };
+            if (/esponja|virulana|estropajo|fregado/.test(n))
+                return { g: '135deg,#FBBF24,#D97706', icon: '🧽', label: 'Fregado' };
+            if (/trapo|paño|pano|franela|rejilla|secador/.test(n))
+                return { g: '135deg,#A78BFA,#7C3AED', icon: '🧺', label: 'Textil' };
+            if (/escoba|mopa|lampaz|cepillo de piso/.test(n))
+                return { g: '135deg,#F472B6,#DB2777', icon: '🧹', label: 'Barrido' };
+            if (/balde|cubo|palangana/.test(n))
+                return { g: '135deg,#38BDF8,#0284C7', icon: '🪣', label: 'Utensilios' };
+            if (/desinfectante|antibacterial|bactericida|sanitiz/.test(n))
+                return { g: '135deg,#2DD4BF,#0D9488', icon: '💧', label: 'Desinfección' };
+            if (/multiuso|multiusos|lustrador|limpiador/.test(n))
+                return { g: '135deg,#67E8F9,#0891B2', icon: '🪥', label: 'Multiuso' };
+            if (/papel|servilleta|tissue|higiénico|higienico/.test(n))
+                return { g: '135deg,#CBD5E1,#94A3B8', icon: '📄', label: 'Descartable' };
+            if (/quitamanchas|manchas|prelavado/.test(n))
+                return { g: '135deg,#F9A8D4,#EC4899', icon: '🫧', label: 'Manchas' };
+            if (/suavizante|suavisante|ropa|lavarropas/.test(n))
+                return { g: '135deg,#DDD6FE,#8B5CF6', icon: '🌸', label: 'Textil' };
+            if (/ambiental|ambiente|fragancia|aroma|desodorante ambi/.test(n))
+                return { g: '135deg,#BBF7D0,#16A34A', icon: '🌿', label: 'Ambiente' };
+            if (/insecticida|mosquito|cucaracha|insecto|mata/.test(n))
+                return { g: '135deg,#FDE68A,#CA8A04', icon: '🌿', label: 'Insectos' };
+            if (/jabón barra|jabon barra|jabón en barra/.test(n))
+                return { g: '135deg,#FCA5A5,#DC2626', icon: '🧼', label: 'Jabón' };
+            if (/bolsa|residuo|basura/.test(n))
+                return { g: '135deg,#6B7280,#374151', icon: '🗑️', label: 'Residuos' };
+            if (/cera|brillo|lustrar/.test(n))
+                return { g: '135deg,#FDE047,#CA8A04', icon: '✨', label: 'Ceras' };
+            if (/alcohol/.test(n))
+                return { g: '135deg,#BAE6FD,#0369A1', icon: '💧', label: 'Alcohol' };
+            // default brand
+            return { g: '135deg,#0D9488,#0F766E', icon: '🧴', label: 'Limpieza' };
+        }
+
         async function loadShop() {
             try {
                 const r = await fetch(SCRIPT_URL);
@@ -658,10 +731,18 @@
                 card.className = 'product-card reveal';
                 card.style.transitionDelay = `${index * 0.05}s`;
 
-                const initial = p.name.charAt(0).toUpperCase();
+                const visual = getProductVisual(p.name);
+                const imgContent = p.image
+                    ? `<div class="product-image" style="background-image:url('${p.image}')"></div>`
+                    : `<div class="product-image" style="background:linear-gradient(${visual.g})">
+                         <div class="prod-fallback">
+                           <span class="prod-fallback-icon">${visual.icon}</span>
+                           <span class="prod-fallback-label">${visual.label}</span>
+                         </div>
+                       </div>`;
 
                 card.innerHTML = `
-                    <div class="product-image" style="${p.image ? `background-image: url('${p.image}')` : ''}">${p.image ? '' : initial}</div>
+                    ${imgContent}
                     <div class="product-info">
                         <h3>${p.name}</h3>
                         <p>${p.description || 'Calidad garantizada Clean Store.'}</p>
