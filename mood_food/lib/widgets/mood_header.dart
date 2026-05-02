@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/product.dart';
 
 class MoodHeader extends StatelessWidget {
-  final MoodCategory category;
+  final CleanCategory category;
   final double height;
 
   const MoodHeader({

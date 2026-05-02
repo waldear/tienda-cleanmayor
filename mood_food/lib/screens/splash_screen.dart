@@ -49,8 +49,12 @@ class _SplashScreenState extends State<SplashScreen>
                 width: 100,
                 height: 100,
                 decoration: BoxDecoration(
-                  color: AppTheme.primary,
-                  borderRadius: BorderRadius.circular(30),
+                  gradient: const LinearGradient(
+                    colors: [AppTheme.primary, AppTheme.primaryDark],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(28),
                   boxShadow: [
                     BoxShadow(
                       color: AppTheme.primary.withValues(alpha: 0.4),
@@ -59,26 +63,27 @@ class _SplashScreenState extends State<SplashScreen>
                     ),
                   ],
                 ),
-                child: const Icon(Icons.restaurant_menu,
-                    size: 52, color: Colors.white),
+                child: const Center(
+                  child: Text('🧴', style: TextStyle(fontSize: 48)),
+                ),
               ),
               const SizedBox(height: 24),
               const Text(
-                'Mood Food',
+                'Clean Mayor',
                 style: TextStyle(
                   fontSize: 36,
                   fontWeight: FontWeight.w800,
                   color: AppTheme.textDark,
-                  letterSpacing: 1.5,
+                  letterSpacing: 1.0,
                 ),
               ),
               const SizedBox(height: 8),
               const Text(
-                'Eat what you feel',
+                'Productos de limpieza premium',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 15,
                   color: AppTheme.textMuted,
-                  letterSpacing: 0.5,
+                  letterSpacing: 0.3,
                 ),
               ),
             ],
