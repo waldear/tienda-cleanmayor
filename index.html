@@ -7,6 +7,7 @@
     <title>Clean Store | Tienda Oficial</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#080a12">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="logo.png">
@@ -21,7 +22,7 @@
             --accent-grad: linear-gradient(135deg, #00d4ff, #a855f7);
             --success: #10b981;
             --text: #ffffff;
-            --text-muted: #cccccc;
+            --text-muted: #e6e6e6;
             --white: rgba(255, 255, 255, 0.06);
             --glass: rgba(255, 255, 255, 0.05);
             --glass-border: rgba(255, 255, 255, 0.15);
@@ -1049,6 +1050,8 @@
                 justify-content: flex-start;
                 flex-wrap: nowrap;
                 padding: 4px 8px;
+                -webkit-mask-image: linear-gradient(90deg, transparent, #000 18px, #000 calc(100% - 18px), transparent);
+                mask-image: linear-gradient(90deg, transparent, #000 18px, #000 calc(100% - 18px), transparent);
             }
         }
     </style>
@@ -1274,11 +1277,12 @@
 
                 const initial = p.name.charAt(0).toUpperCase();
                 const safeName = p.name.replace(/'/g, "\\'");
+                const imageLabel = escapeAttr(p.image ? `Imagen de ${p.name}` : `Producto sin imagen: ${p.name}`);
 
                 card.innerHTML = `
                     ${badgeHtml}
                     ${overlayHtml}
-                    <div class="product-image" style="${p.image ? `background-image: url('${p.image}')` : ''}">${p.image ? '' : initial}</div>
+                    <div class="product-image" role="img" aria-label="${imageLabel}" style="${p.image ? `background-image: url('${p.image}')` : ''}">${p.image ? '' : initial}</div>
                     <div class="product-info">
                         <h3>${p.name}</h3>
                         <p>${p.description || 'Calidad garantizada Clean Store.'}</p>
@@ -1310,6 +1314,16 @@
             saveCartToStorage();
         }
 
+        function escapeAttr(value) {
+            return String(value).replace(/[&<>"']/g, ch => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[ch]));
+        }
+
         function refreshCart() {
             let total = 0;
             let count = 0;
@@ -1330,6 +1344,9 @@
             if (mode !== pricelist) {
                 // El barrido arranca mientras el selector cierra
                 setTimeout(() => wipeAndSwitch(mode), 150);
+            } else {
+                savePricelistPreference(mode);
+                showToast(`Modo ${mode} activado`, 'success');
             }
         }
 
@@ -1344,6 +1361,7 @@
                 drawGrid();
                 refreshCart();
                 saveCartToStorage();
+                showToast(`Modo ${mode} activado`, 'success');
             }, 310);
             overlay.addEventListener('animationend', () => overlay.classList.remove('wiping'), { once: true });
         }
@@ -1520,7 +1538,13 @@
         function saveCartToStorage() {
             try {
                 localStorage.setItem('cleanstore_cart', JSON.stringify(items));
-                localStorage.setItem('cleanstore_pricelist', pricelist);
+                savePricelistPreference(pricelist);
+            } catch(e) {}
+        }
+
+        function savePricelistPreference(mode) {
+            try {
+                localStorage.setItem('cleanstore_pricelist', mode);
             } catch(e) {}
         }
 
