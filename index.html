@@ -1284,7 +1284,9 @@
                 let overlayHtml = isOutOfStock ? '<div class="agotado-overlay">Agotado</div>' : '';
 
                 const initial = p.name.charAt(0).toUpperCase();
-                const safeName = p.name.replace(/'/g, "\\'");
+                const safeName = escapeAttr(p.name);
+                const escapedName = escapeAttr(p.name);
+                const escapedDesc = escapeAttr(p.description || 'Calidad garantizada Clean Store.');
                 const imageSrc = p.image || PRODUCT_IMAGE_FALLBACKS[p.name] || '';
                 const imageStyle = imageSrc ? `background-image: url('${String(imageSrc).replace(/'/g, '%27')}')` : '';
                 const imageLabel = escapeAttr(imageSrc ? `Imagen de ${p.name}` : `Producto sin imagen: ${p.name}`);
@@ -1294,13 +1296,13 @@
                     ${overlayHtml}
                     <div class="product-image" role="img" aria-label="${imageLabel}" style="${imageStyle}">${imageSrc ? '' : initial}</div>
                     <div class="product-info">
-                        <h3>${p.name}</h3>
-                        <p>${p.description || 'Calidad garantizada Clean Store.'}</p>
+                        <h3>${escapedName}</h3>
+                        <p>${escapedDesc}</p>
                         <div class="product-footer">
                             <span class="product-price">$${Number(price).toLocaleString('es-AR')}</span>
                             <div class="qty-picker">
                                 <button onclick="modQty('${safeName}', -1)">-</button>
-                                <span data-qty="${p.name}">${items[p.name] || 0}</span>
+                                <span data-qty="${escapedName}">${items[p.name] || 0}</span>
                                 <button onclick="modQty('${safeName}', 1)">+</button>
                             </div>
                         </div>
@@ -1398,7 +1400,7 @@
                 total += subtotal;
                 html += `
                     <div class="order-summary-row">
-                        <span class="item-name">${n}</span>
+                        <span class="item-name">${escapeAttr(n)}</span>
                         <span class="item-qty">x${items[n]}</span>
                         <span class="item-sub">$${subtotal.toLocaleString('es-AR')}</span>
                     </div>`;
@@ -1532,7 +1534,8 @@
             const bar = document.getElementById('categoryBar');
             bar.innerHTML = '<button class="cat-pill active" data-cat="todos" onclick="filterCategory(\'todos\')">Todos</button>';
             cats.forEach(c => {
-                bar.innerHTML += `<button class="cat-pill" data-cat="${c}" onclick="filterCategory('${c.replace(/'/g, "\\'")}')">${c}</button>`;
+                const ec = escapeAttr(c);
+                bar.innerHTML += `<button class="cat-pill" data-cat="${ec}" onclick="filterCategory('${ec}')">${ec}</button>`;
             });
         }
 
@@ -1633,7 +1636,7 @@
             if (type === 'error') icon = '🚫';
             if (type === 'warning') icon = '⚠️';
 
-            t.innerHTML = `<span>${icon}</span> <span>${msg}</span>`;
+            t.innerHTML = `<span>${icon}</span> <span>${escapeAttr(msg)}</span>`;
             document.body.appendChild(t);
             setTimeout(() => t.remove(), 4000);
         }

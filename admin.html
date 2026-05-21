@@ -255,6 +255,13 @@
     <!-- Core Modules -->
     <script src="js/api.js"></script>
     <script>
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str).replace(/[&<>"']/g, ch => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[ch]));
+        }
+
         // Sincronizar URL con api.js (se usa automáticamente por GAS_API)
         let sessionToken = sessionStorage.getItem('adminToken');
 
@@ -334,14 +341,14 @@
 
                 tableRow.innerHTML = `
                     <td><span style="opacity: 0.6; font-size: 0.8rem">${dateDisplay}</span></td>
-                    <td><strong style="font-family: monospace;">${id || '-'}</strong></td>
+                    <td><strong style="font-family: monospace;">${escapeHtml(id) || '-'}</strong></td>
                     <td>
-                        <div style="font-weight: 600">${cliente || 'Sin nombre'}</div>
-                        <div style="font-size: 0.8rem; opacity: 0.6">${tel || ''}</div>
+                        <div style="font-weight: 600">${escapeHtml(cliente) || 'Sin nombre'}</div>
+                        <div style="font-size: 0.8rem; opacity: 0.6">${escapeHtml(tel)}</div>
                     </td>
-                    <td style="font-size: 0.85rem; max-width: 300px;">${productos || ''}</td>
-                    <td><span class="status-pill">${modo || ''}</span></td>
-                    <td><span style="font-size: 0.8rem">${entrega || ''}</span></td>
+                    <td style="font-size: 0.85rem; max-width: 300px;">${escapeHtml(productos)}</td>
+                    <td><span class="status-pill">${escapeHtml(modo)}</span></td>
+                    <td><span style="font-size: 0.8rem">${escapeHtml(entrega)}</span></td>
                 `;
                 body.appendChild(tableRow);
             });
