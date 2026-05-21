@@ -1201,6 +1201,13 @@
         let pricelist = 'minorista';
         let selectedCategory = 'todos';
         let paymentMethod = 'whatsapp';
+        const PRODUCT_IMAGE_FALLBACKS = {
+            'Jabón Líquido para Manos 1L': 'assets/products/jabon-liquido-manos-1l.png',
+            'Limpiacristales Concentrado': 'assets/products/limpiacristales-concentrado.png',
+            'Detergente en Polvo 3Kg': 'assets/products/detergente-polvo-3kg.png',
+            'Suavizante para Ropa 2L': 'assets/products/suavizante-ropa-2l.png',
+            'Quitamanchas Profesional': 'assets/products/quitamanchas-profesional.png'
+        };
 
         async function loadShop() {
             const params = new URLSearchParams(window.location.search);
@@ -1278,12 +1285,14 @@
 
                 const initial = p.name.charAt(0).toUpperCase();
                 const safeName = p.name.replace(/'/g, "\\'");
-                const imageLabel = escapeAttr(p.image ? `Imagen de ${p.name}` : `Producto sin imagen: ${p.name}`);
+                const imageSrc = p.image || PRODUCT_IMAGE_FALLBACKS[p.name] || '';
+                const imageStyle = imageSrc ? `background-image: url('${String(imageSrc).replace(/'/g, '%27')}')` : '';
+                const imageLabel = escapeAttr(imageSrc ? `Imagen de ${p.name}` : `Producto sin imagen: ${p.name}`);
 
                 card.innerHTML = `
                     ${badgeHtml}
                     ${overlayHtml}
-                    <div class="product-image" role="img" aria-label="${imageLabel}" style="${p.image ? `background-image: url('${p.image}')` : ''}">${p.image ? '' : initial}</div>
+                    <div class="product-image" role="img" aria-label="${imageLabel}" style="${imageStyle}">${imageSrc ? '' : initial}</div>
                     <div class="product-info">
                         <h3>${p.name}</h3>
                         <p>${p.description || 'Calidad garantizada Clean Store.'}</p>
